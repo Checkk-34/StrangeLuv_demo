@@ -1,9 +1,10 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { PageContext } from './PageContext';
 import WheelGame from './WheelGame';
 import SlotsGame from './SlotsGame';
 import QuizGame from './QuizGame';
 import { WheelIcon, SlotIcon, HeartIcon, NoteIcon, PinIcon, CloseIcon } from './Icons';
+import { fetchActivities, addActivity, deleteActivity as deleteActivityApi, type User } from '../lib/auth';
 
 const GAME_CARDS = [
   {
@@ -44,18 +45,23 @@ const GAME_CARDS = [
 export interface AgendaItem {
   id: number;
   text: string;
-  from: string;
+  source: string;
+  user_id: string;
 }
 
 type Display = 'idle' | 'entering' | 'cards' | 'exiting-cards' | 'game' | 'exiting-game' | 'exiting-page';
 
-export default function PlayPage() {
+interface Props {
+  user: User;
+}
+
+export default function PlayPage({ user }: Props) {
   const { pageIndex, activeIndex } = useContext(PageContext);
   const [display, setDisplay] = useState<Display>('idle');
   const [currentGame, setCurrentGame] = useState<string>('');
   const [agenda, setAgenda] = useState<AgendaItem[]>([]);
   const [inputText, setInputText] = useState('');
-  const idRef = useRef(0);
+  const [loadingAgenda, setLoadingAgenda] = useState(false);
 
   // 页面进出
   useEffect(() => {
@@ -97,27 +103,50 @@ export default function PlayPage() {
     }, 350);
   }
 
-  function addAgendaItem(text: string) {
-    idRef.current += 1;
-    setAgenda(prev => [...prev, { id: idRef.current, text, from: currentGame || 'manual' }]);
+  // 首次加载时从 Supabase 读取活动清单
+  useEffect(() => {
+    if (activeIndex === pageIndex && agenda.length === 0 && !loadingAgenda) {
+      setLoadingAgenda(true);
+      fetchActivities().then((data) => {
+        setAgenda(data.map((a) => ({
+          id: a.id!,
+          text: a.text,
+          source: a.source,
+          user_id: a.user_id,
+        })));
+        setLoadingAgenda(false);
+      });
+    }
+  }, [activeIndex, pageIndex, agenda.length, loadingAgenda]);
+
+  async function addAgendaItem(text: string) {
+    const source = currentGame || 'manual';
+    await addActivity(user.username, text, source);
+    // 刷新
+    const data = await fetchActivities();
+    setAgenda(data.map((a) => ({ id: a.id!, text: a.text, source: a.source, user_id: a.user_id })));
   }
 
-  function addAgendaItems(items: string[]) {
-    items.forEach(text => {
-      idRef.current += 1;
-      setAgenda(prev => [...prev, { id: idRef.current, text, from: currentGame || 'quiz' }]);
-    });
+  async function addAgendaItems(items: string[]) {
+    const source = currentGame || 'quiz';
+    for (const text of items) {
+      await addActivity(user.username, text, source);
+    }
+    const data = await fetchActivities();
+    setAgenda(data.map((a) => ({ id: a.id!, text: a.text, source: a.source, user_id: a.user_id })));
   }
 
-  function deleteAgendaItem(id: number) {
+  async function deleteAgendaItem(id: number) {
+    await deleteActivityApi(id);
     setAgenda(prev => prev.filter(item => item.id !== id));
   }
 
-  function handleManualAdd() {
+  async function handleManualAdd() {
     const t = inputText.trim();
     if (!t) return;
-    idRef.current += 1;
-    setAgenda(prev => [...prev, { id: idRef.current, text: t, from: 'manual' }]);
+    await addActivity(user.username, t, 'manual');
+    const data = await fetchActivities();
+    setAgenda(data.map((a) => ({ id: a.id!, text: a.text, source: a.source, user_id: a.user_id })));
     setInputText('');
   }
 
@@ -296,10 +325,13 @@ export default function PlayPage() {
                   }}
                 >
                   <span className="w-5 h-5 flex items-center justify-center shrink-0 opacity-50">
-                    {item.from === 'manual' ? <NoteIcon size={18} /> : item.from === 'wheel' ? <WheelIcon size={18} /> : item.from === 'slots' ? <SlotIcon size={18} /> : item.from === 'quiz' ? <HeartIcon size={18} /> : <PinIcon size={18} />}
+                    {item.source === 'manual' ? <NoteIcon size={18} /> : item.source === 'wheel' ? <WheelIcon size={18} /> : item.source === 'slots' ? <SlotIcon size={18} /> : item.source === 'quiz' ? <HeartIcon size={18} /> : <PinIcon size={18} />}
                   </span>
                   <span className="w-px h-4 bg-lily-mid/30" />
                   <span className="font-zh text-sm md:text-base text-text-primary/60 flex-1 truncate">{item.text}</span>
+                  <span className="font-en text-[9px] tracking-[0.08em] text-text-tertiary/30 shrink-0 mr-1">
+                    {item.user_id === 'fish' ? '🐟' : '🐸'}
+                  </span>
                   <button
                     onClick={() => deleteAgendaItem(item.id)}
                     className="opacity-0 group-hover/item:opacity-30 hover:!opacity-60 transition-opacity duration-200 text-text-secondary text-sm leading-none shrink-0"

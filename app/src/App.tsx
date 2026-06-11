@@ -1,17 +1,26 @@
+import { useState, useEffect } from 'react';
+import { getCurrentUser, type User } from './lib/auth';
 import BreathingPanel from './components/BreathingPanel';
 import PageSlider from './components/PageSlider';
 import CountdownView from './components/CountdownView';
 import SplitMoviePage from './components/SplitMoviePage';
 import PlayPage from './components/PlayPage';
+import LoginPage from './components/LoginPage';
 
 const LABELS = ['倒计时', '影视', '玩法', '留言'];
 
 export default function App() {
-  return (
-    <div className="relative w-full h-[100dvh] bg-[#FFE4E1] overflow-hidden">
-      {/* ===== 持久背景层 ===== */}
-      <BreathingPanel color="rgba(200,70,80," speed={0.5} density={0.22} blendMode="multiply" />
+  const [user, setUser] = useState<User | null>(null);
+  const [ready, setReady] = useState(false);
 
+  useEffect(() => {
+    setUser(getCurrentUser());
+    setReady(true);
+  }, []);
+
+  const bgLayer = (
+    <>
+      <BreathingPanel color="rgba(200,70,80," speed={0.5} density={0.22} blendMode="multiply" />
       {/* 噪点纹理 */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.030] z-[1]"
@@ -21,6 +30,25 @@ export default function App() {
           backgroundSize: '256px 256px',
         }}
       />
+    </>
+  );
+
+  // 未登录 → 显示登录页
+  if (!ready) return null;
+  if (!user) {
+    return (
+      <div className="relative w-full h-[100dvh] bg-[#FFE4E1] overflow-hidden">
+        {bgLayer}
+        <div className="relative z-10 w-full h-full">
+          <LoginPage onLogin={(u) => setUser(u)} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full h-[100dvh] bg-[#FFE4E1] overflow-hidden">
+      {bgLayer}
 
       {/* ===== 滑页浮层 ===== */}
       <div className="relative z-10 w-full h-full">
@@ -32,7 +60,7 @@ export default function App() {
           <SplitMoviePage />
 
           {/* 第 3 页 · 玩法区 */}
-          <PlayPage />
+          <PlayPage user={user} />
 
           {/* 第 4 页 · 留言占位 */}
           <div className="h-full w-full flex flex-col justify-center px-4 md:px-8">
