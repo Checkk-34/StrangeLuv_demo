@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { getCurrentUser, type User } from './lib/auth';
+import { getCurrentUser, logout as logoutAuth, type User } from './lib/auth';
 import BreathingPanel from './components/BreathingPanel';
 import PageSlider from './components/PageSlider';
 import CountdownView from './components/CountdownView';
 import SplitMoviePage from './components/SplitMoviePage';
 import PlayPage from './components/PlayPage';
 import LoginPage from './components/LoginPage';
+import { FishIcon, FrogIcon, CloseIcon } from './components/Icons';
 
 const LABELS = ['倒计时', '影视', '玩法', '留言'];
 
@@ -49,6 +50,23 @@ export default function App() {
   return (
     <div className="relative w-full h-[100dvh] bg-[#FFE4E1] overflow-hidden">
       {bgLayer}
+
+      {/* ===== 用户头像 + 登出 ===== */}
+      <div className="fixed bottom-6 right-6 z-30 flex items-center gap-2">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-card-glass-deep backdrop-blur-xl border border-white/20 shadow-[0_4px_16px_var(--color-shadow-lg)]">
+          <span className={user.username === 'fish' ? 'text-fish-teal' : 'text-frog-emerald'}>
+            {user.username === 'fish' ? <FishIcon size={20} /> : <FrogIcon size={20} />}
+          </span>
+          <span className="font-zh text-xs font-medium text-text-primary/70">{user.displayName}</span>
+          <button
+            onClick={() => { logoutAuth(); setUser(null); }}
+            className="ml-1 text-text-tertiary/40 hover:text-heart-rose/70 transition-colors duration-200"
+            aria-label="登出"
+          >
+            <CloseIcon size={14} />
+          </button>
+        </div>
+      </div>
 
       {/* ===== 滑页浮层 ===== */}
       <div className="relative z-10 w-full h-full">
