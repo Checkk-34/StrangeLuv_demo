@@ -1,0 +1,277 @@
+/* =============================================
+   🐟🐸 池塘奇遇 · 周末约定 — Design System
+   Tailwind CSS v4 + @theme
+   ============================================= */
+
+@import "tailwindcss";
+
+/* ---- 🌊 池塘水色系 — Design Tokens (v2) ---- */
+@theme {
+  /* 🌸 Warm peach surfaces — 可爱暖色系 */
+  --color-water-surface: #FFF0E8;
+  --color-water-mid: #F5E6DC;
+  --color-water-deep: #EAD9CC;
+  --color-water-sky: #FFF5ED;
+  --color-water-shadow: #C8B8A8;
+
+  /* 🌸 Warm accents */
+  --color-lily-light: #FFD4C4;
+  --color-lily-mid: #FFC4B0;
+  --color-lily-deep: #F0A890;
+
+  /* Roles — 🐟 Fish (Coral) / 🐸 Frog (Emerald) */
+  --color-fish-teal: #E88350;
+  --color-fish-teal-dark: #D07242;
+  --color-fish-glow: rgba(232, 131, 80, 0.25);
+  --color-frog-emerald: #6DB87C;
+  --color-frog-emerald-dark: #529C61;
+  --color-frog-glow: rgba(109, 184, 124, 0.20);
+
+  /* Card surfaces — warm cream glass */
+  --color-card-glass: rgba(255, 250, 242, 0.72);
+  --color-card-glass-deep: rgba(255, 250, 242, 0.82);
+  --color-card-soft: #FFF8F0;
+  --color-card-solid: #FFF5EC;
+
+  /* Text — warm dark */
+  --color-text-primary: #3D3A36;
+  --color-text-secondary: #7A6B62;
+  --color-text-tertiary: #B8A898;
+  --color-text-inverse: #F5F0E8;
+
+  /* Accents */
+  --color-heart-rose: #FF6B8A;
+  --color-heart-rose-glow: rgba(255, 107, 138, 0.15);
+  --color-gold-amber: #D4A857;
+  --color-water-sky-glow: rgba(255, 200, 180, 0.25);
+  --color-sunset-coral: #FF9A6B;
+  --color-sunset-coral-glow: rgba(255, 154, 107, 0.20);
+
+  /* Shadows — warm-tinted */
+  --color-shadow-sm: rgba(61, 58, 54, 0.04);
+  --color-shadow-md: rgba(61, 58, 54, 0.07);
+  --color-shadow-lg: rgba(61, 58, 54, 0.10);
+  --color-shadow-xl: rgba(61, 58, 54, 0.14);
+  --color-shadow-2xl: rgba(61, 58, 54, 0.20);
+
+  /* Custom animations — v2 playful pond */
+  --animate-ripple-in: ripple-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  --animate-float-up: float-up 0.8s ease-out backwards;
+  --animate-fade-slide-up: fade-slide-up 0.6s ease-out backwards;
+  --animate-pop-bounce: pop-bounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  --animate-scale-in: scale-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  --animate-water-droplet: water-droplet 0.9s ease-out backwards;
+  --animate-slide-in-right: slide-in-right 0.6s ease-out;
+  --animate-slide-out-right: slide-out-right 0.45s ease-in forwards;
+  --animate-pop-out: pop-out 0.3s ease-in forwards;
+  --animate-heartbeat: heartbeat 1.2s ease-in-out infinite;
+
+  /* Radius */
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-xl: 40px;
+
+  /* Fonts */
+  --font-zh: 'Zen Maru Gothic', sans-serif;
+  --font-en: 'M PLUS Rounded 1c', sans-serif;
+}
+
+/* ---- 🌓 深色模式 ---- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-water-surface: #1A1C1E;
+    --color-water-mid: #222529;
+    --color-water-deep: #2A2D32;
+    --color-water-sky: #2D3035;
+    --color-water-shadow: #0D0E0F;
+
+    --color-card-glass: rgba(42, 45, 50, 0.80);
+    --color-card-glass-deep: rgba(42, 45, 50, 0.88);
+    --color-card-soft: #2E3136;
+    --color-card-solid: #2A2D32;
+
+    --color-text-primary: #D4D0CC;
+    --color-text-secondary: #9A948C;
+    --color-text-tertiary: #6B6660;
+
+    --color-shadow-sm: rgba(0, 0, 0, 0.20);
+    --color-shadow-md: rgba(0, 0, 0, 0.30);
+    --color-shadow-lg: rgba(0, 0, 0, 0.40);
+    --color-shadow-xl: rgba(0, 0, 0, 0.50);
+    --color-shadow-2xl: rgba(0, 0, 0, 0.60);
+
+    --color-fish-teal: #E88350;
+    --color-fish-teal-dark: #D07242;
+    --color-frog-emerald: #5CA86B;
+    --color-frog-emerald-dark: #4A8D58;
+  }
+}
+
+/* ---- 全局基础样式 ---- */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    min-height: 100dvh;
+    background: radial-gradient(ellipse at 50% 0%, var(--color-water-sky), var(--color-water-mid) 60%, var(--color-water-deep));
+    background-attachment: fixed;
+    font-family: var(--font-zh);
+    line-height: 1.6;
+    scroll-behavior: smooth;
+  }
+
+  /* 等宽数字 */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ---- Animations v2 — 池塘涟漪系 ---- */
+@keyframes ripple-in {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+    filter: blur(4px);
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes float-up {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-slide-up {
+  from {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pop-bounce {
+  from {
+    transform: scale(0.2) translateY(40px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.08) translateY(-4px);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes water-droplet {
+  from {
+    transform: scale(0) translateY(-20px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1) translateY(2px);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-scale {
+  from { transform: scale(1); }
+  to { transform: scale(1.04); }
+}
+
+@keyframes pulse-bar {
+  from { opacity: 0.4; transform: scaleY(0.6); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(120px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(80px);
+    opacity: 0;
+  }
+}
+
+@keyframes pop-out {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* 💓 心跳 — 用于倒计时全天跳动 */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.08); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.04); }
+  56% { transform: scale(1); }
+}
+
+/* ---- 自定义工具类 ---- */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-gradient-water {
+    background: radial-gradient(ellipse at 50% 0%, var(--color-water-sky), var(--color-water-mid) 60%, var(--color-water-deep));
+  }
+
+  .text-gradient-rose {
+    background: linear-gradient(135deg, var(--color-heart-rose), var(--color-gold-amber));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}

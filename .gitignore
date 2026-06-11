@@ -1,0 +1,15 @@
+node_modules/
+dist/
+app/dist/
+.env
+*.local
+.DS_Store
+Thumbs.db
+
+# 备份文件夹
+app-backup/
+app-backup-fresh/
+
+# 工具内部文件
+.codegraph/
+.reasonix/

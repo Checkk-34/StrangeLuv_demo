@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>设计参考 - 池塘奇遇 · 周末约定</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500;700;900&family=M+PLUS+Rounded+1c:wght@300;400;500;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* =============================================
+       🐟🐸 池塘奇遇 · 周末约定 — 设计参考
+       4 Sections | 2025
+       ============================================= */
+
+    /* --- Reset & Base --- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* 🎨 Brand Palette */
+      --fish: #E88350;
+      --fish-dark: #D07242;
+      --fish-light: #F5A67B;
+      --fish-glow: rgba(232, 131, 80, 0.20);
+      --frog: #6DB87C;
+      --frog-dark: #529C61;
+      --frog-light: #8ED09D;
+      --frog-glow: rgba(109, 184, 124, 0.18);
+
+      /* 🌊 Surfaces */
+      --cream: #FFF8F0;
+      --cream-mid: #FFF0E8;
+      --cream-deep: #F5E6DC;
+      --cream-sky: #FFFDF8;
+      --white: #FFFFFF;
+
+      /* 📝 Text */
+      --text-primary: #3D3A36;
+      --text-secondary: #7A6B62;
+      --text-tertiary: #B8A898;
+      --text-on-fish: #FFFFFF;
+      --text-on-frog: #FFFFFF;
+
+      /* ❤️ Accents */
+      --heart: #FF6B8A;
+      --heart-soft: rgba(255, 107, 138, 0.12);
+      --gold: #D4A857;
+      --gold-soft: rgba(212, 168, 87, 0.15);
+      --sunset: #FF9A6B;
+
+      /* 🎭 Shadows */
+      --shadow-sm: 0 2px 8px rgba(61, 58, 54, 0.04);
+      --shadow-md: 0 8px 24px rgba(61, 58, 54, 0.07);
+      --shadow-lg: 0 16px 48px rgba(61, 58, 54, 0.10);
+      --shadow-xl: 0 24px 64px rgba(61, 58, 54, 0.14);
+      --shadow-glow-fish: 0 8px 32px rgba(232, 131, 80, 0.25);
+      --shadow-glow-frog: 0 8px 32px rgba(109, 184, 124, 0.20);
+
+      /* 🔤 Typography */
+      --font-zh: 'Zen Maru Gothic', sans-serif;
+      --font-en: 'M PLUS Rounded 1c', sans-serif;
+
+      /* 📐 Spacing */
+      --section-gap: 0;
+      --content-max: 1200px;
+      --content-narrow: 800px;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-zh);
+      color: var(--text-primary);
+      background: var(--cream-sky);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img { max-width: 100%; display: block; }
+
+    /* --- Container --- */
+    .container {
+      width: 100%;
+      max-width: var(--content-max);
+      margin: 0 auto;
+      padding: 0 clamp(24px, 5vw, 64px);
+    }
+
+    .container-narrow {
+      max-width: var(--content-narrow);
+    }
+
+    /* =============================================
+       SECTION 1 — HERO · 池塘奇遇
+       Composition: 居中偏低（文字下方，视觉上方）
+       Background: 色块双联（鱼橙 + 蛙绿交汇）
+       Hero Scale: 中等编辑风
+       ============================================= */
+    #hero {
+      min-height: 100dvh;
+      display: flex;
+      align-items: flex-end;
+      position: relative;
+      overflow: hidden;
+      background: var(--cream-sky);
+    }
+
+    /* Dual color blocks — diagonal intersection */
+    #hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 72%;
+      background:
+        linear-gradient(135deg,
+          var(--fish) 0%,
+          var(--fish-light) 30%,
+          transparent 50%),
+        linear-gradient(225deg,
+          var(--frog) 0%,
+          var(--frog-light) 30%,
+          transparent 50%);
+      clip-path: polygon(0 0, 100% 0, 100% 75%, 0 100%);
+      z-index: 0;
+    }
+
+    /* Subtle glow orbs */
+    #hero::after {
+      content: '';
+      position: absolute;
+      top: 10%;
+      right: 10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(232, 131, 80, 0.15), transparent 70%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .hero-glow-left {
+      position: absolute;
+      bottom: 30%;
+      left: -5%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(109, 184, 124, 0.12), transparent 70%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Floating polaroid-style mascot illustrations */
+    .hero-visuals {
+      position: absolute;
+      top: 6%;
+      left: 0;
+      width: 100%;
+      height: 68%;
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: clamp(40px, 8vw, 100px);
+      pointer-events: none;
+    }
+
+    .polaroid-card {
+      background: var(--white);
+      padding: 12px 12px 48px 12px;
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg), var(--shadow-xl);
+      transform: rotate(var(--rot, 0deg)) translateY(var(--y, 0));
+      transition: transform 0.4s ease;
+      width: clamp(160px, 20vw, 260px);
+      position: relative;
+    }
+
+    .polaroid-card:hover {
+      transform: rotate(var(--rot, 0deg)) translateY(-8px);
+    }
+
+    .polaroid-card .icon-box {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(48px, 6vw, 80px);
+      background: var(--cream-mid);
+      margin-bottom: 8px;
+    }
+
+    .polaroid-card .icon-box.fish-bg {
+      background: linear-gradient(135deg, var(--fish-light), var(--cream-mid));
+    }
+
+    .polaroid-card .icon-box.frog-bg {
+      background: linear-gradient(135deg, var(--frog-light), var(--cream-mid));
+    }
+
+    .polaroid-card .caption {
+      position: absolute;
+      bottom: 14px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      letter-spacing: 0.08em;
+    }
+
+    .polaroid-card:nth-child(1) { --rot: -6deg; --y: 12px; }
+    .polaroid-card:nth-child(2) { --rot: 4deg; --y: -8px; z-index: 3; }
+    .polaroid-card:nth-child(3) { --rot: -2deg; --y: 18px; }
+
+    /* Hero text panel — bottom centered */
+    .hero-content {
+      position: relative;
+      z-index: 4;
+      width: 100%;
+      padding: clamp(32px, 5vw, 60px) 0 clamp(40px, 6vw, 80px);
+      text-align: center;
+      background: linear-gradient(to top, var(--cream-sky) 60%, transparent);
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--white);
+      padding: 8px 20px;
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+
+    .hero-tag span { color: var(--heart); }
+
+    .hero-title {
+      font-size: clamp(2.4rem, 7vw, 5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .hero-title .fish-word { color: var(--fish); }
+    .hero-title .frog-word { color: var(--frog); }
+    .hero-title .heart-word { color: var(--heart); }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto 28px;
+      font-weight: 400;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--fish);
+      color: var(--text-on-fish);
+      padding: 16px 36px;
+      border-radius: 100px;
+      font-family: var(--font-zh);
+      font-weight: 700;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-glow-fish);
+      text-decoration: none;
+    }
+
+    .btn-primary:hover {
+      background: var(--fish-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(232, 131, 80, 0.35);
+    }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--text-primary);
+      padding: 14px 28px;
+      border-radius: 100px;
+      font-family: var(--font-zh);
+      font-weight: 500;
+      font-size: 1rem;
+      border: 1.5px solid var(--text-tertiary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .btn-outline:hover {
+      border-color: var(--fish);
+      color: var(--fish);
+      transform: translateY(-2px);
+    }
+
+    /* Scroll indicator */
+    .scroll-hint {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-tertiary);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      animation: bob 2s ease-in-out infinite;
+    }
+
+    .scroll-hint .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+      animation: bounce-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(4px); }
+    }
+
+    @keyframes bounce-dot {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+
+    /* =============================================
+       SECTION 2 — FEATURES · 周末约定
+       Composition: Bento 网格（左上引导）
+       Background: 纯色表面 + 柔和环境渐变
+       Iconic Component: 干净无间隙 Bento 网格
+       ============================================= */
+    #features {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      background: var(--cream);
+      padding: clamp(60px, 8vw, 100px) 0;
+    }
+
+    #features::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle at 100% 0%, var(--gold-soft), transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--cream-deep);
+      border-radius: 28px;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .feature-card {
+      background: var(--white);
+      padding: clamp(32px, 4vw, 52px);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      background: var(--cream-sky);
+    }
+
+    .feature-card:first-child {
+      grid-column: 1 / 2;
+      grid-row: 1 / 3;
+      justify-content: center;
+    }
+
+    .feature-card:first-child .feature-icon {
+      font-size: clamp(40px, 5vw, 64px);
+      margin-bottom: 16px;
+    }
+
+    .feature-card .feature-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .feature-card .feature-label .dot-fish {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--fish);
+    }
+
+    .feature-card .feature-label .dot-frog {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--frog);
+    }
+
+    .feature-card .feature-label .dot-heart {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--heart);
+    }
+
+    .feature-card .feature-label .dot-gold {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+
+    .feature-card h3 {
+      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: clamp(0.88rem, 1.2vw, 1rem);
+      line-height: 1.7;
+      max-width: 320px;
+    }
+
+    .feature-card .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .feature-link {
+      margin-top: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--fish);
+      text-decoration: none;
+      transition: gap 0.3s ease;
+      margin-top: 24px;
+    }
+
+    .feature-link:hover {
+      gap: 12px;
+    }
+
+    .feature-link .arrow {
+      transition: transform 0.3s ease;
+    }
+
+    .feature-link:hover .arrow {
+      transform: translateX(4px);
+    }
+
+    .feature-card.alt .feature-link {
+      color: var(--frog);
+    }
+
+    .feature-card:first-child .feature-link {
+      color: var(--heart);
+    }
+
+    /* Section header (next to bento) */
+    .features-header {
+      position: relative;
+      z-index: 1;
+      margin-bottom: clamp(32px, 5vw, 56px);
+    }
+
+    .features-header .sec-number {
+      font-family: var(--font-en);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-tertiary);
+      letter-spacing: 0.15em;
+      margin-bottom: 8px;
+    }
+
+    .features-header h2 {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+
+    .features-header h2 .fish-word { color: var(--fish); }
+    .features-header h2 .frog-word { color: var(--frog); }
+
+    .features-header p {
+      color: var(--text-secondary);
+      max-width: 480px;
+      font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+    }
+
+    /* =============================================
+       SECTION 3 — STORIES · 他们的约定
+       Composition: 浮动宝丽来散射 + 超大指标条
+       Background: 微妙纹理 + 深奶油色
+       Iconic Component: 浮动宝丽来弧 + 超大指标
+       ============================================= */
+    #stories {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      background: var(--cream-mid);
+      padding: clamp(60px, 8vw, 100px) 0;
+      overflow: hidden;
+    }
+
+    /* Subtle dot grid texture */
+    #stories::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(var(--text-tertiary) 0.8px, transparent 0.8px);
+      background-size: 28px 28px;
+      opacity: 0.15;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #stories::after {
+      content: '';
+      position: absolute;
+      bottom: -20%;
+      left: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--frog-glow), transparent 60%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .stories-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(32px, 5vw, 64px);
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Left: floating polariods */
+    .stories-visual {
+      position: relative;
+      min-height: 400px;
+    }
+
+    .story-polaroid {
+      position: absolute;
+      background: var(--white);
+      padding: 10px 10px 36px 10px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-md), var(--shadow-lg);
+      width: clamp(120px, 16vw, 180px);
+      transition: all 0.4s ease;
+    }
+
+    .story-polaroid:hover {
+      transform: scale(1.05) rotate(var(--rot, 0deg)) !important;
+      z-index: 10;
+    }
+
+    .story-polaroid .av-box {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+      margin-bottom: 6px;
+    }
+
+    .story-polaroid .av-box.orange {
+      background: linear-gradient(135deg, var(--fish-light), var(--cream-mid));
+    }
+
+    .story-polaroid .av-box.green {
+      background: linear-gradient(135deg, var(--frog-light), var(--cream-mid));
+    }
+
+    .story-polaroid .st-caption {
+      font-size: 0.65rem;
+      color: var(--text-tertiary);
+      text-align: center;
+      position: absolute;
+      bottom: 10px;
+      left: 0;
+      width: 100%;
+      font-weight: 500;
+    }
+
+    .story-polaroid:nth-child(1) { top: 5%; left: 5%; --rot: -8deg; }
+    .story-polaroid:nth-child(2) { top: 20%; right: 10%; --rot: 6deg; z-index: 2; }
+    .story-polaroid:nth-child(3) { bottom: 5%; left: 20%; --rot: -3deg; }
+    .story-polaroid:nth-child(4) { bottom: 15%; right: 5%; --rot: 10deg; z-index: 1; }
+
+    /* Right: content + metric bar */
+    .stories-content {
+      padding-left: clamp(0px, 2vw, 24px);
+    }
+
+    .stories-content .sec-number {
+      font-family: var(--font-en);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-tertiary);
+      letter-spacing: 0.15em;
+      margin-bottom: 8px;
+    }
+
+    .stories-content h2 {
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .stories-content > p {
+      color: var(--text-secondary);
+      font-size: clamp(0.92rem, 1.2vw, 1.05rem);
+      line-height: 1.8;
+      margin-bottom: 32px;
+      max-width: 440px;
+    }
+
+    /* Oversized metric bar */
+    .metric-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--cream-deep);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 32px;
+    }
+
+    .metric-item {
+      background: var(--white);
+      padding: clamp(16px, 2vw, 28px);
+      text-align: center;
+    }
+
+    .metric-item .number {
+      font-family: var(--font-en);
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .metric-item .number.fish-num { color: var(--fish); }
+    .metric-item .number.frog-num { color: var(--frog); }
+    .metric-item .number.heart-num { color: var(--heart); }
+
+    .metric-item .label {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    .story-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+      font-weight: 500;
+      text-decoration: none;
+      font-size: 0.92rem;
+      border-bottom: 1.5px solid var(--text-tertiary);
+      padding-bottom: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .story-cta:hover {
+      color: var(--frog);
+      border-color: var(--frog);
+      gap: 12px;
+    }
+
+    /* =============================================
+       SECTION 4 — CTA · 开始你的奇遇
+       Composition: 居中声明 + 全宽氛围
+       Background: 温和环境渐变 + 对角错位拼贴装饰
+       Iconic Component: 对角错位方格拼贴
+       CTA: 超大标题 + 微小 CTA 提示
+       ============================================= */
+    #cta {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: var(--cream-sky);
+      padding: clamp(60px, 8vw, 100px) 0;
+      overflow: hidden;
+    }
+
+    /* Diagonal offset tile collage — decorative background */
+    .diagonal-tiles {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr;
+      gap: 0;
+    }
+
+    .tile {
+      opacity: 0.06;
+      transition: opacity 0.5s ease;
+    }
+
+    .tile:nth-child(1) { background: var(--fish); }
+    .tile:nth-child(2) { background: var(--frog); }
+    .tile:nth-child(3) { background: var(--heart); }
+    .tile:nth-child(4) { background: var(--gold); }
+    .tile:nth-child(5) { background: var(--frog); }
+    .tile:nth-child(6) { background: var(--heart); }
+    .tile:nth-child(7) { background: var(--fish); }
+    .tile:nth-child(8) { background: var(--gold); }
+    .tile:nth-child(9) { background: var(--heart); }
+    .tile:nth-child(10) { background: var(--fish); }
+    .tile:nth-child(11) { background: var(--gold); }
+    .tile:nth-child(12) { background: var(--frog); }
+
+    /* Offset each row */
+    .tile:nth-child(1) { grid-column: 1 / 3; grid-row: 1; transform: translateX(-20%); }
+    .tile:nth-child(2) { grid-column: 3 / 5; grid-row: 1; transform: translateX(10%); }
+    .tile:nth-child(3) { grid-column: 1 / 2; grid-row: 2; transform: translateX(40%); }
+    .tile:nth-child(4) { grid-column: 2 / 4; grid-row: 2; transform: translateX(-5%); }
+    .tile:nth-child(5) { grid-column: 4 / 5; grid-row: 2; transform: translateX(-30%); }
+    .tile:nth-child(6) { grid-column: 1 / 3; grid-row: 3; transform: translateX(15%); }
+    .tile:nth-child(7) { grid-column: 3 / 5; grid-row: 3; transform: translateX(-15%); }
+
+    /* Warm ambient glow */
+    #cta::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, var(--fish-glow), var(--frog-glow) 50%, transparent 70%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .cta-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 680px;
+      padding: 0 clamp(24px, 5vw, 48px);
+    }
+
+    .cta-content .sec-number {
+      font-family: var(--font-en);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-tertiary);
+      letter-spacing: 0.15em;
+      margin-bottom: 16px;
+    }
+
+    .cta-content .big-heart {
+      font-size: clamp(2rem, 5vw, 4rem);
+      display: block;
+      margin-bottom: 20px;
+      animation: pulse-heart 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-heart {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .cta-content h2 {
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .cta-content h2 .fish-word { color: var(--fish); }
+    .cta-content h2 .frog-word { color: var(--frog); }
+
+    .cta-content > p {
+      color: var(--text-secondary);
+      font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+      line-height: 1.8;
+      margin-bottom: 40px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-xl {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--frog);
+      color: var(--text-on-frog);
+      padding: 20px 48px;
+      border-radius: 100px;
+      font-family: var(--font-zh);
+      font-weight: 700;
+      font-size: 1.1rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-glow-frog);
+      text-decoration: none;
+    }
+
+    .btn-xl:hover {
+      background: var(--frog-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(109, 184, 124, 0.35);
+    }
+
+    .cta-minor {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.88rem;
+      color: var(--text-tertiary);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .cta-minor:hover {
+      color: var(--text-primary);
+      border-color: var(--text-primary);
+    }
+
+    .cta-footer-note {
+      margin-top: 48px;
+      font-size: 0.78rem;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+    }
+
+    .cta-footer-note span {
+      color: var(--heart);
+    }
+
+    /* =============================================
+       RESPONSIVE
+       ============================================= */
+    @media (max-width: 768px) {
+      /* Hero: smaller polaroids */
+      .hero-visuals {
+        top: 3%;
+        height: 55%;
+        gap: 20px;
+      }
+
+      .polaroid-card {
+        width: clamp(100px, 28vw, 150px);
+        padding: 8px 8px 32px 8px;
+      }
+
+      .polaroid-card .icon-box {
+        font-size: 2rem;
+      }
+
+      .polaroid-card .caption {
+        font-size: 0.6rem;
+        bottom: 10px;
+      }
+
+      #hero::before {
+        height: 62%;
+        clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+      }
+
+      /* Features: stack vertically */
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-card:first-child {
+        grid-column: 1;
+        grid-row: auto;
+      }
+
+      .feature-card p {
+        max-width: 100%;
+      }
+
+      /* Stories: stack */
+      .stories-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .stories-visual {
+        min-height: 320px;
+      }
+
+      .story-polaroid {
+        width: clamp(100px, 24vw, 140px);
+      }
+
+      /* Metric bar */
+      .metric-bar {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .stories-content {
+        padding-left: 0;
+      }
+
+      /* CTA */
+      .diagonal-tiles {
+        opacity: 0.4;
+      }
+
+      .btn-xl {
+        padding: 16px 36px;
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-visuals {
+        gap: 12px;
+        height: 50%;
+      }
+
+      .polaroid-card {
+        width: clamp(80px, 26vw, 120px);
+        padding: 6px 6px 24px 6px;
+      }
+
+      .polaroid-card .icon-box {
+        font-size: 1.6rem;
+      }
+
+      .metric-bar {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .metric-item {
+        padding: 16px;
+      }
+    }
+
+    /* Marker label — top left of each section for design review */
+    .section-marker {
+      position: absolute;
+      top: clamp(16px, 3vw, 32px);
+      left: clamp(16px, 3vw, 32px);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-en);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-tertiary);
+      letter-spacing: 0.08em;
+      opacity: 0.5;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .section-marker .line {
+      width: 24px;
+      height: 1px;
+      background: var(--text-tertiary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =============================================
+       SECTION 1 — HERO
+       Composition: 居中偏低 | 色块双联背景
+       ============================================= -->
+  <section id="hero">
+    <div class="section-marker"><span class="line"></span> 01 · HERO</div>
+    <div class="hero-glow-left"></div>
+
+    <!-- Floating polaroid mascots -->
+    <div class="hero-visuals">
+      <div class="polaroid-card">
+        <div class="icon-box fish-bg">🐟</div>
+        <div class="caption">🐟 小鱼 · 策划师</div>
+      </div>
+      <div class="polaroid-card" style="z-index:3;">
+        <div class="icon-box" style="background:linear-gradient(135deg, var(--heart-soft), var(--cream-mid));">💕</div>
+        <div class="caption">我们的周末</div>
+      </div>
+      <div class="polaroid-card">
+        <div class="icon-box frog-bg">🐸</div>
+        <div class="caption">🐸 蛙蛙 · 冒险家</div>
+      </div>
+    </div>
+
+    <!-- Bottom text panel -->
+    <div class="hero-content">
+      <div class="hero-tag">
+        🏞️ 春日池塘 · <span>异地也在一起</span>
+      </div>
+      <h1 class="hero-title">
+        池塘<span class="fish-word">奇遇</span><br>
+        周末<span class="frog-word">约定</span>
+      </h1>
+      <p class="hero-sub">
+        从一部电影到一场冒险，从默契问答到留言气泡——<br>
+        属于 <span style="color:var(--fish);font-weight:600;">🐟 小鱼</span> 和 <span style="color:var(--frog);font-weight:600;">🐸 蛙蛙</span> 的周末工具箱。
+      </p>
+      <div class="hero-actions">
+        <a href="#" class="btn-primary cta-app-link">开始规划 🎯</a>
+        <a href="#" class="btn-outline cta-app-link">看看怎么玩 →</a>
+      </div>
+    </div>
+
+    <div class="scroll-hint">
+      <span>探索更多</span>
+      <div class="dot"></div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       SECTION 2 — FEATURES
+       Composition: Bento 网格 | 左上引导
+       ============================================= -->
+  <section id="features">
+    <div class="section-marker"><span class="line"></span> 02 · FEATURES</div>
+    <div class="container">
+      <div class="features-header">
+        <div class="sec-number">— FEATURES</div>
+        <h2>属于你们的 <span class="fish-word">周末</span><br>所有 <span class="frog-word">约定</span> 工具</h2>
+        <p>从灵感碰撞到确认计划，每一步都充满池塘边的默契。</p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Large hero card -->
+        <div class="feature-card">
+          <div class="feature-label"><span class="dot-heart"></span> 核心体验</div>
+          <div class="feature-icon">🎰</div>
+          <h3>默契大挑战</h3>
+          <p>你和 TA 各自选择想做的事，系统自动匹配共同选项——就像在池塘边同时伸手触碰同一片荷叶。三轮匹配，发现你们有多合拍。</p>
+          <a href="#" class="feature-link">
+            体验默契匹配 <span class="arrow">→</span>
+          </a>
+        </div>
+
+        <!-- Regular card 1 -->
+        <div class="feature-card">
+          <div class="feature-label"><span class="dot-fish"></span> 🐟 小鱼的最爱</div>
+          <div class="feature-icon">🎬</div>
+          <h3>电影灵感</h3>
+          <p>每周热门影视自动推荐，滑动收藏想一起看的片子。异地也能同步选片。</p>
+          <a href="#" class="feature-link">浏览片单 <span class="arrow">→</span></a>
+        </div>
+
+        <!-- Regular card 2 -->
+        <div class="feature-card alt">
+          <div class="feature-label"><span class="dot-frog"></span> 🐸 蛙蛙的最爱</div>
+          <div class="feature-icon">🎡</div>
+          <h3>随机活动轮盘</h3>
+          <p>转盘决定周末冒险——做饭、散步、看电影、逛博物馆……让未知成为惊喜。</p>
+          <a href="#" class="feature-link">转动轮盘 <span class="arrow">→</span></a>
+        </div>
+
+        <!-- Regular card 3 -->
+        <div class="feature-card">
+          <div class="feature-label"><span class="dot-gold"></span> 共同记忆</div>
+          <div class="feature-icon">💬</div>
+          <h3>弹幕留言墙</h3>
+          <p>漂浮的气泡里藏着想说的话。每一次刷新，都是一次来自池塘深处的回响。</p>
+          <a href="#" class="feature-link">留下心声 <span class="arrow">→</span></a>
+        </div>
+
+        <!-- Regular card 4 -->
+        <div class="feature-card alt">
+          <div class="feature-label"><span class="dot-heart"></span> 甜蜜日常</div>
+          <div class="feature-icon">⏳</div>
+          <h3>倒计时 · 在一起</h3>
+          <p>午夜之前，我们还有时间。实时倒计时，每分每秒都值得标记。</p>
+          <a href="#" class="feature-link">查看时间 <span class="arrow">→</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       SECTION 3 — STORIES
+       Composition: 浮动宝丽来散射 + 超大数据指标
+       ============================================= -->
+  <section id="stories">
+    <div class="section-marker"><span class="line"></span> 03 · STORIES</div>
+    <div class="container">
+      <div class="stories-layout">
+        <!-- Left: floating polaroids -->
+        <div class="stories-visual">
+          <div class="story-polaroid">
+            <div class="av-box orange">🐟</div>
+            <div class="st-caption">北京 · 周五晚</div>
+          </div>
+          <div class="story-polaroid">
+            <div class="av-box green">🐸</div>
+            <div class="st-caption">上海 · 周六下午</div>
+          </div>
+          <div class="story-polaroid">
+            <div class="av-box orange">🍜</div>
+            <div class="st-caption">同步做饭挑战</div>
+          </div>
+          <div class="story-polaroid">
+            <div class="av-box green">🎬</div>
+            <div class="st-caption">同时播放键</div>
+          </div>
+        </div>
+
+        <!-- Right: content + metrics -->
+        <div class="stories-content">
+          <div class="sec-number">— SOCIAL PROOF</div>
+          <h2>他们也在<br>池塘边相遇</h2>
+          <p>已经有 <span style="color:var(--heart);font-weight:700;">486</span> 对情侣在这个池塘里找到了属于他们的周末仪式感。有的是异地，有的同城但总不知道做什么——现在周末有了期待。</p>
+
+          <!-- Oversized metric bar -->
+          <div class="metric-bar">
+            <div class="metric-item">
+              <div class="number fish-num">486</div>
+              <div class="label">对情侣 · 正在使用</div>
+            </div>
+            <div class="metric-item">
+              <div class="number frog-num">1,247</div>
+              <div class="label">个周末 · 已被约定</div>
+            </div>
+            <div class="metric-item">
+              <div class="number heart-num">93%</div>
+              <div class="label">默契匹配 · 满意度</div>
+            </div>
+          </div>
+
+          <a href="#" class="story-cta">
+            阅读他们的故事 <span>→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       SECTION 4 — CTA
+       Composition: 居中声明 | 对角错位拼贴背景
+       ============================================= -->
+  <section id="cta">
+    <div class="section-marker"><span class="line"></span> 04 · CTA</div>
+
+    <!-- Diagonal tile decoration -->
+    <div class="diagonal-tiles">
+      <div class="tile"></div>
+      <div class="tile"></div>
+      <div class="tile"></div>
+      <div class="tile"></div>
+      <div class="tile"></div>
+      <div class="tile"></div>
+      <div class="tile"></div>
+      <div class="tile"></div>
+      <div class="tile"></div>
+      <div class="tile"></div>
+      <div class="tile"></div>
+      <div class="tile"></div>
+    </div>
+
+    <div class="cta-content">
+      <div class="sec-number">— LET'S BEGIN</div>
+      <span class="big-heart">💚</span>
+      <h2>
+        开始你们的 <span class="fish-word">池塘</span><br>
+        <span class="frog-word">奇遇</span> 吧
+      </h2>
+      <p>
+        每一次相约都是一颗石子投入池塘——<br>
+        涟漪会越来越大，直到你们在同一个周末里相遇。
+      </p>
+      <div class="cta-actions">
+        <a href="#" class="btn-xl cta-app-link">立即开始 →</a>
+        <a href="#" class="cta-minor">了解所有功能</a>
+      </div>
+      <div class="cta-footer-note">
+        🐟 <span>❤</span> 🐸 — 异地不是距离，周末就是约定
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       🚀 跳转脚本：开发环境 → localhost:5173，生产 → /app/
+       ============================================= -->
+  <script>
+    (function() {
+      var isDev = window.location.hostname === 'localhost' ||
+                  window.location.hostname === '127.0.0.1' ||
+                  window.location.protocol === 'file:';
+      var appUrl = isDev ? 'http://localhost:5173' : '/app/';
+      document.querySelectorAll('.cta-app-link').forEach(function(el) {
+        el.href = appUrl;
+      });
+    })();
+  </script>
+
+</body>
+</html>

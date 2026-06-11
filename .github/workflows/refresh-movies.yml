@@ -1,0 +1,39 @@
+# 🎬 自动刷新电影缓存
+# 每月 1 日、15 日自动从 TMDb 拉取热门电影 → 写入 Supabase
+# 也可以手动触发：GitHub 仓库 → Actions → refresh-movies → Run workflow
+
+name: refresh-movies
+
+on:
+  schedule:
+    # 每月 1 日、15 日 UTC 02:00（北京时间 10:00）
+    - cron: '0 2 1,15 * *'
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+
+      - name: ⚡ 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: app/package-lock.json
+
+      - name: 📦 安装依赖
+        run: npm install
+
+      - name: 🎬 刷新电影缓存
+        run: node scripts/refresh-movies.js
+        env:
+          VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
