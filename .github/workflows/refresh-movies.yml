@@ -34,6 +34,6 @@ jobs:
       - name: 🎬 刷新电影缓存
         run: node scripts/refresh-movies.js
         env:
-          VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY }}
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_TMDB_API_KEY: 8854d1bfab32f3ef6cce9faa9a3864bb
+          VITE_SUPABASE_URL: https://ivwdsderwrfgbkssmeff.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_WLNzE1ZUSWHypkqvrCjpuQ_IYBAJ7oO
