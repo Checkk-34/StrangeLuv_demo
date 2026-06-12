@@ -9,6 +9,23 @@ interface DailyCache {
   ids: number[];       // 选中的 8 部 tmdb_id
 }
 
+/** 字符串种子 → 确定性伪随机数生成器 [0,1) — 两人同一天看到同一批电影 */
+function createSeededRandom(seed: string): () => number {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) {
+    h = ((h << 5) - h) + seed.charCodeAt(i);
+    h |= 0;
+  }
+  let s = h >>> 0;
+  return () => {
+    s |= 0;
+    s = s + 0x6D2B79F5 | 0;
+    let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
 /** 今天日期字符串 */
 function todayStr(): string {
   const d = new Date();
@@ -71,14 +88,15 @@ export async function getMovies(): Promise<MovieItem[]> {
 export async function pickRandom(): Promise<MovieItem[]> {
   const cached = await getCachedMovies('popular');
   if (!cached || !Array.isArray(cached.data) || cached.data.length === 0) return [];
-  return pickAndSave(cached.data, todayStr());
+  return pickAndSave(cached.data, todayStr(), false);
 }
 
 /** 洗牌取 8 + 写 localStorage */
-function pickAndSave(pool: MovieItem[], date: string): MovieItem[] {
+function pickAndSave(pool: MovieItem[], date: string, seeded = true): MovieItem[] {
+  const rng = seeded ? createSeededRandom(date) : () => Math.random();
   const shuffled = [...pool];
   for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(rng() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   const picked = shuffled.slice(0, 8);

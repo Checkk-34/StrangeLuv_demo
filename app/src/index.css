@@ -258,6 +258,12 @@
   56% { transform: scale(1); }
 }
 
+/* 🎯 弹幕飞入 — 从右到左 */
+@keyframes barrage-fly {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(calc(-100vw - 300px)); }
+}
+
 /* ---- 自定义工具类 ---- */
 @layer utilities {
   .text-balance {

@@ -1,6 +1,12 @@
 import { useState, type ReactNode } from 'react';
 import { FishIcon, FrogIcon, HeartIcon, ClipboardIcon, RefreshIcon, CheckCircleIcon } from './Icons';
+import { submitQuiz } from '../lib/auth';
 import GameDialog from './GameDialog';
+
+function todayStr(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 const QUIZ_OPTIONS = [
   '看电影', '吃火锅', '逛公园', '打游戏',
@@ -59,9 +65,14 @@ export default function QuizGame({ onAddItems, onEnd }: Props) {
     setPicks2(prev => prev.includes(opt) ? prev.filter(v => v !== opt) : [...prev, opt]);
   }
 
-  function submit2() {
+  async function submit2() {
     if (picks2.length === 0) return;
     setPhase('calculating');
+
+    // 持久化双方问卷结果到 Supabase
+    const today = todayStr();
+    await submitQuiz(today, role1!, picks1);
+    await submitQuiz(today, role2!, picks2);
 
     const intersection = picks1.filter(p => picks2.includes(p));
     setTimeout(() => {

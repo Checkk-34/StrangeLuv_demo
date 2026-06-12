@@ -6,6 +6,7 @@ import CountdownView from './components/CountdownView';
 import SplitMoviePage from './components/SplitMoviePage';
 import PlayPage from './components/PlayPage';
 import LoginPage from './components/LoginPage';
+import BarrageBoard from './components/BarrageBoard';
 import { FishIcon, FrogIcon, CloseIcon } from './components/Icons';
 
 const LABELS = ['倒计时', '影视', '玩法', '留言'];
@@ -80,20 +81,8 @@ export default function App() {
           {/* 第 3 页 · 玩法区 */}
           <PlayPage user={user} />
 
-          {/* 第 4 页 · 留言占位 */}
-          <div className="h-full w-full flex flex-col justify-center px-4 md:px-8">
-            <div className="w-full max-w-[720px] mx-auto rounded-[2rem] bg-[rgba(255,250,242,0.82)] backdrop-blur-xl shadow-[0_8px_40px_rgba(80,40,20,0.15),inset_0_1px_0_rgba(255,255,255,0.6)] px-6 py-8 md:px-8 md:py-10">
-              <span className="font-en text-[11px] tracking-[0.28em] text-[#A8614E]/50 uppercase">
-                · Messages
-              </span>
-              <h2 className="font-zh text-2xl md:text-3xl font-medium text-[#3D3A36] tracking-[-0.01em] mt-4">
-                说点什么
-              </h2>
-              <p className="text-sm text-[#7A6B62]/70 leading-relaxed mt-2">
-                弹幕留言板即将登场
-              </p>
-            </div>
-          </div>
+          {/* 第 4 页 · 弹幕留言板 */}
+          <BarrageBoard />
         </PageSlider>
       </div>
     </div>
