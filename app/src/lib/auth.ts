@@ -1,6 +1,12 @@
 import { createHash } from './crypto';
 import { getSupabase } from './supabase';
 
+/** 今天日期字符串 YYYY-MM-DD */
+export function todayStr(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 /** 登录用户信息 */
 export interface User {
   username: string;   // 'fish' | 'frog'
@@ -142,6 +148,19 @@ export async function deleteQuiz(date: string): Promise<void> {
   const sb = getSupabase();
   if (!sb) return;
   await sb.from('quiz_results').delete().eq('date', date);
+}
+
+/** 清理过期数据（前一天及更早的问卷、活动、留言） */
+export async function cleanupExpiredData(): Promise<void> {
+  const sb = getSupabase();
+  if (!sb) return;
+  const today = todayStr();
+  // 清理非当天的问卷
+  await sb.from('quiz_results').delete().lt('date', today);
+  // 清理非当天的活动（created_at 是 timestamptz，用日期比较）
+  await sb.from('activities').delete().lt('created_at', today + 'T00:00:00Z');
+  // 清理非当天的留言
+  await sb.from('messages').delete().lt('created_at', today + 'T00:00:00Z');
 }
 
 // =============================================

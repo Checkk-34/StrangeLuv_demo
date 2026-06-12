@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getCurrentUser, logout as logoutAuth, type User } from './lib/auth';
+import { getCurrentUser, logout as logoutAuth, cleanupExpiredData, type User } from './lib/auth';
 import BreathingPanel from './components/BreathingPanel';
 import PageSlider from './components/PageSlider';
 import CountdownView from './components/CountdownView';
@@ -18,6 +18,24 @@ export default function App() {
   useEffect(() => {
     setUser(getCurrentUser());
     setReady(true);
+  }, []);
+
+  /* ---- 每日 0 点自动清理 ---- */
+  useEffect(() => {
+    // 启动时先清理一次（可能有跨天的过期数据）
+    cleanupExpiredData();
+
+    const schedule = () => {
+      const now = new Date();
+      const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+      return setTimeout(async () => {
+        await cleanupExpiredData();
+        schedule(); // 重新调度下一轮
+      }, midnight.getTime() - now.getTime());
+    };
+
+    const timer = schedule();
+    return () => clearTimeout(timer);
   }, []);
 
   const bgLayer = (

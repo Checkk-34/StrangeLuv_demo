@@ -301,6 +301,7 @@ export default function PlayPage({ user }: Props) {
   }
 
   async function addAgendaItem(text: string) {
+    if (text.trim() && agenda.some(a => a.text === text.trim())) return; // 去重
     const item = await addActivity(user.username, text, currentGame || 'manual');
     if (item) {
       setAgenda(prev => [{ id: item.id!, text: item.text, source: item.source, user_id: item.user_id }, ...prev]);
@@ -308,8 +309,11 @@ export default function PlayPage({ user }: Props) {
   }
 
   async function addAgendaItems(items: string[]) {
+    const existing = new Set(agenda.map(a => a.text));
+    const deduped = items.filter(t => t.trim() && !existing.has(t));
+    if (deduped.length === 0) return; // 全部重复，静默跳过
     const results = await Promise.all(
-      items.map(text => addActivity(user.username, text, currentGame || 'quiz'))
+      deduped.map(text => addActivity(user.username, text, currentGame || 'quiz'))
     );
     const newItems = results.filter(Boolean).map(a => ({ id: a!.id!, text: a!.text, source: a!.source, user_id: a!.user_id }));
     if (newItems.length > 0) {
@@ -325,6 +329,7 @@ export default function PlayPage({ user }: Props) {
   async function handleManualAdd() {
     const t = inputText.trim();
     if (!t) return;
+    if (agenda.some(a => a.text === t)) { setInputText(''); return; } // 去重
     const item = await addActivity(user.username, t, 'manual');
     if (item) {
       setAgenda(prev => [{ id: item.id!, text: item.text, source: item.source, user_id: item.user_id }, ...prev]);
