@@ -30,7 +30,6 @@ export default function BarrageBoard() {
   const historyEndRef = useRef<HTMLDivElement>(null);
 
   const isFish = user?.username === 'fish';
-  const myColor = isFish ? '#E88350' : '#6DB87C';
 
   /** 将新 Message[] 转为飞入 Bullet + 更新历史 */
   const ingest = useCallback((msgs: Message[]) => {
@@ -115,7 +114,7 @@ export default function BarrageBoard() {
       {/* ═══ 飞入弹幕层（flex-1 高度永远不变） ═══ */}
       <div className="flex-1 relative overflow-hidden">
         {bullets.map(b => {
-          const isMe = b.userId === user?.username;
+          const bubbleColor = b.userId === 'fish' ? '#E88350' : '#6DB87C';
           return (
             <span
               key={b.key}
@@ -123,13 +122,13 @@ export default function BarrageBoard() {
               style={{
                 top: `${TRACK_HEIGHTS[b.track]}vh`,
                 left: '100%',
-                color: isMe ? '#fff' : b.userId === 'fish' ? '#E88350' : '#6DB87C',
-                background: isMe ? myColor : 'transparent',
+                color: '#fff',
+                background: bubbleColor,
                 borderRadius: '999px',
-                padding: isMe ? '4px 16px' : '0',
-                boxShadow: isMe ? `0 2px 12px ${myColor}44` : 'none',
+                padding: '4px 16px',
+                boxShadow: `0 2px 12px ${bubbleColor}44`,
                 opacity: 0.92,
-                textShadow: isMe ? '0 1px 2px rgba(0,0,0,0.15)' : '0 1px 4px rgba(255,255,255,0.6)',
+                textShadow: '0 1px 2px rgba(0,0,0,0.15)',
                 animation: `barrage-fly ${b.duration}s linear forwards`,
               }}
             >
@@ -179,20 +178,20 @@ export default function BarrageBoard() {
               <p className="text-center text-text-tertiary/40 text-sm font-zh py-4">还没有留言</p>
             )}
             {history.map(m => {
-              const isMe = m.user_id === user?.username;
               const mColor = m.user_id === 'fish' ? '#E88350' : '#6DB87C';
+              const isRight = m.user_id === user?.username;
               return (
-                <div key={m.id} className={`flex items-start gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
+                <div key={m.id} className={`flex items-start gap-2 ${isRight ? 'flex-row-reverse' : ''}`}>
                   <span className="shrink-0 mt-0.5" style={{ color: mColor }}>
                     {m.user_id === 'fish' ? <FishIcon size={16} /> : <FrogIcon size={16} />}
                   </span>
                   <div
                     className="max-w-[75%] px-3.5 py-2 rounded-2xl text-sm font-zh leading-relaxed"
                     style={{
-                      background: isMe ? myColor : 'rgba(255,255,255,0.6)',
-                      color: isMe ? '#fff' : '#3D3A36',
-                      borderBottomLeftRadius: isMe ? '1rem' : '4px',
-                      borderBottomRightRadius: isMe ? '4px' : '1rem',
+                      background: mColor,
+                      color: '#fff',
+                      borderBottomLeftRadius: isRight ? '1rem' : '4px',
+                      borderBottomRightRadius: isRight ? '4px' : '1rem',
                     }}
                   >
                     {m.text}
