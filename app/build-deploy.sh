@@ -13,7 +13,7 @@ mv dist/index.html dist/app/
 mv dist/assets dist/app/
 
 echo "🌐 Copying landing page as index.html..."
-cp ../landing.html dist/index.html
+cp landing.html dist/index.html
 
 echo "📄 Creating 404.html for SPA fallback..."
 cp dist/app/index.html dist/404.html
