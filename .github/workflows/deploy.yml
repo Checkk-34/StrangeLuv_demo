@@ -22,6 +22,10 @@ jobs:
           cache-dependency-path: app/package-lock.json
 
       - name: Build
+        env:
+          VITE_SUPABASE_URL: https://ivwdsderwrfgbkssmeff.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_WLNzE1ZUSWHypkqvrCjpuQ_IYBAJ7oO
+          VITE_TMDB_API_KEY: 8854d1bfab32f3ef6cce9faa9a3864bb
         run: |
           cd app
           npm ci
