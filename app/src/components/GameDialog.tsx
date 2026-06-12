@@ -49,7 +49,7 @@ export default function GameDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      className="absolute inset-0 z-50 flex items-center justify-center px-4"
       onClick={dismissable ? onDismiss : undefined}
     >
       {/* 背景遮罩 */}

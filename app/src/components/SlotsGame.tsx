@@ -60,10 +60,10 @@ export default function SlotsGame({ onAddItem, onEnd }: Props) {
 
   // 渲染偏移量
   function getTranslateY(key: 'time' | 'type' | 'detail'): string {
-    return `translateY(-${offsets[key] * 42}px)`;
+    return `translateY(-${offsets[key] * 52}px)`;
   }
 
-  // const itemHeight = 42;
+  // const itemHeight = 52;
   // const visibleCount = 3;
 
   return (
@@ -76,7 +76,7 @@ export default function SlotsGame({ onAddItem, onEnd }: Props) {
           const repeated = [...items, ...items, ...items];
           return (
             <div key={key} className="flex flex-col items-center gap-2">
-              <div className="w-[90px] md:w-[110px] h-[calc(42px*3)] rounded-xl overflow-hidden
+              <div className="w-[110px] md:w-[150px] h-[calc(52px*3)] rounded-xl overflow-hidden
                 bg-card-glass border border-white/20
                 shadow-[inset_0_2px_8px_var(--color-shadow-md)] relative">
                 {/* 上下渐隐 */}
@@ -85,11 +85,11 @@ export default function SlotsGame({ onAddItem, onEnd }: Props) {
                     background: 'linear-gradient(to bottom, var(--color-card-glass-deep) 0%, transparent 25%, transparent 75%, var(--color-card-glass-deep) 100%)'
                   }} />
                 <div
-                  className="transition-transform duration-[1.5s] ease-[cubic-bezier(0.15,0.05,0.05,1)]"
+                  className="transition-transform duration-[1.5s] ease-[cubic-bezier(0.15,0.05,0.05,1)] will-change-transform"
                   style={{ transform: getTranslateY(key), transitionDuration: phase === 'spinning' ? '1.5s' : '0s' }}
                 >
                   {repeated.map((item, i) => (
-                    <div key={i} className="h-[42px] flex items-center justify-center text-[13px] md:text-[14px] text-text-primary/70 font-zh px-2 text-center leading-tight">
+                    <div key={i} className="h-[52px] flex items-center justify-center text-[14px] md:text-[16px] text-text-primary/70 font-zh px-2 text-center leading-tight">
                       {item}
                     </div>
                   ))}

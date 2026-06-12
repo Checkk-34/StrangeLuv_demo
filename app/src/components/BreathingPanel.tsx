@@ -9,6 +9,8 @@ interface Props {
   density?: number;
   /** CSS mix-blend-mode */
   blendMode?: React.CSSProperties['mixBlendMode'];
+  /** 自定义字符集 (默认 ASCII 点块) */
+  palette?: string;
 }
 
 /**
@@ -20,6 +22,7 @@ export default function BreathingPanel({
   speed = 0.55,
   density = 0.22,
   blendMode = 'screen',
+  palette,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -27,7 +30,7 @@ export default function BreathingPanel({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const PALETTE = '   ...:::---+++***◦◦••▢▣';
+    const PALETTE = palette || '   ...:::---+++***◦◦••▢▣';
     const CELL = 20; // 从 16 → 20，减少 36% 的绘制格子
     const FONT_SIZE = 13;
 
