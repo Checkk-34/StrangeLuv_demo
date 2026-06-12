@@ -1,4 +1,5 @@
 import { getCachedMovies, type MovieItem } from './supabase';
+import { todayStr } from './auth';
 
 export type { MovieItem }; // re-export for consumers
 
@@ -28,11 +29,6 @@ function createSeededRandom(seed: string): () => number {
 }
 
 /** 今天日期字符串 */
-function todayStr(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
 /** 读 localStorage 中的每日缓存 */
 function readDaily(): DailyCache | null {
   try {

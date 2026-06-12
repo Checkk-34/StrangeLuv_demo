@@ -20,22 +20,26 @@ export default function App() {
     setReady(true);
   }, []);
 
-  /* ---- 每日 0 点自动清理 ---- */
+  /* ---- 每日清理：0 点精确调度 + 每 6 小时保底 ---- */
   useEffect(() => {
-    // 启动时先清理一次（可能有跨天的过期数据）
+    // 启动时先清理一次
     cleanupExpiredData();
 
-    const schedule = () => {
+    // 精确到 0 点
+    const scheduleMidnight = () => {
       const now = new Date();
       const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
       return setTimeout(async () => {
         await cleanupExpiredData();
-        schedule(); // 重新调度下一轮
+        scheduleMidnight();
       }, midnight.getTime() - now.getTime());
     };
 
-    const timer = schedule();
-    return () => clearTimeout(timer);
+    // 保底：每 6 小时检查一次（防浏览器休眠错过 0 点）
+    const interval = setInterval(() => cleanupExpiredData(), 6 * 3600 * 1000);
+
+    const timer = scheduleMidnight();
+    return () => { clearTimeout(timer); clearInterval(interval); };
   }, []);
 
   const bgLayer = (

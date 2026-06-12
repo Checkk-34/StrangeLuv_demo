@@ -1,11 +1,6 @@
 import { useState, useEffect, useRef, useCallback, memo, type ReactNode } from 'react';
 import { FishIcon, FrogIcon, HeartIcon, ClipboardIcon, CheckCircleIcon } from './Icons';
-import { fetchQuiz, submitQuiz, markQuizDone, type User } from '../lib/auth';
-
-function todayStr(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+import { fetchQuiz, submitQuiz, markQuizDone, todayStr, type User } from '../lib/auth';
 
 const QUIZ_OPTIONS = [
   '看电影', '吃火锅', '逛公园', '打游戏',

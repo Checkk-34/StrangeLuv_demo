@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { getCurrentUser, fetchMessages, sendMessage, type Message } from '../lib/auth';
 import { FishIcon, FrogIcon } from './Icons';
+import { PageContext } from './PageContext';
 
 const TRACK_COUNT = 6;
 const TRACK_HEIGHTS = [6, 20, 34, 48, 62, 76]; // vh %
@@ -17,6 +18,8 @@ interface Bullet {
 }
 
 export default function BarrageBoard() {
+  const { pageIndex, activeIndex } = useContext(PageContext);
+  const isActive = activeIndex === pageIndex;
   const [bullets, setBullets] = useState<Bullet[]>([]);
   const [history, setHistory] = useState<Message[]>([]);
   const [showHistory, setShowHistory] = useState(false);
@@ -59,21 +62,27 @@ export default function BarrageBoard() {
     ingest(data);
   }, [ingest]);
 
-  // 首次加载 + 轮询
+  // 进入页面时开始轮询，离开时停止
   useEffect(() => {
+    if (!isActive) return;
     poll();
     const timer = setInterval(poll, POLL_MS);
-    return () => clearInterval(timer);
-  }, [poll]);
+    return () => {
+      clearInterval(timer);
+      setBullets([]);
+      loadedIds.current.clear();
+    };
+  }, [poll, isActive]);
 
   // 清理已离屏 bullet
   useEffect(() => {
+    if (!isActive) return;
     const cleaner = setInterval(() => {
       const now = performance.now();
       setBullets(prev => prev.filter(b => now - b.enteredAt < 16000));
     }, 3000);
     return () => clearInterval(cleaner);
-  }, []);
+  }, [isActive]);
 
   // 历史面板展开时自动滚到底部（直接操作容器 scrollTop，不触发祖先滚动）
   useEffect(() => {

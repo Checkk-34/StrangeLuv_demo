@@ -7,18 +7,13 @@ import SlotsGame from './SlotsGame';
 import QuizGame from './QuizGame';
 import BreathingPanel from './BreathingPanel';
 import { WheelIcon, SlotIcon, HeartIcon, NoteIcon, PinIcon, CloseIcon, FishIcon, FrogIcon, CheckCircleIcon } from './Icons';
-import { fetchActivities, addActivity, deleteActivity as deleteActivityApi, fetchQuiz, markQuizDone, type User } from '../lib/auth';
+import { fetchActivities, addActivity, deleteActivity as deleteActivityApi, fetchQuiz, markQuizDone, todayStr, type User } from '../lib/auth';
 
 /* ---------- helpers ---------- */
 const AGENDA_CACHE_KEY = 'pond-agenda-cache';
 
 function cn(...classes: (string | false | undefined | null)[]) {
   return classes.filter(Boolean).join(' ');
-}
-
-function todayStr(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 /* ---------- tab config ---------- */
