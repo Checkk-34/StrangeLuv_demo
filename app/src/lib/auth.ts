@@ -155,12 +155,18 @@ export async function cleanupExpiredData(): Promise<void> {
   const sb = getSupabase();
   if (!sb) return;
   const today = todayStr();
-  // 清理非当天的问卷
+
+  // 计算本地时间的"今天零点"（避免 UTC 午夜偏移 bug）
+  const now = new Date();
+  const localStartOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+  const localMidnightUTC = localStartOfDay.toISOString();
+
+  // 清理非当天的问卷（date 是 TEXT，比较字符串即可）
   await sb.from('quiz_results').delete().lt('date', today);
-  // 清理非当天的活动（created_at 是 timestamptz，用日期比较）
-  await sb.from('activities').delete().lt('created_at', today + 'T00:00:00Z');
+  // 清理非当天的活动
+  await sb.from('activities').delete().lt('created_at', localMidnightUTC);
   // 清理非当天的留言
-  await sb.from('messages').delete().lt('created_at', today + 'T00:00:00Z');
+  await sb.from('messages').delete().lt('created_at', localMidnightUTC);
 }
 
 // =============================================
