@@ -1268,7 +1268,14 @@
       var isDev = window.location.hostname === 'localhost' ||
                   window.location.hostname === '127.0.0.1' ||
                   window.location.protocol === 'file:';
-      var appUrl = isDev ? 'http://localhost:5173' : '/app/';
+      var appUrl;
+      if (isDev) {
+        appUrl = 'http://localhost:5173';
+      } else {
+        // 自动感知部署路径（GitHub Pages 项目站点或自定义域名均兼容）
+        var basePath = window.location.pathname.replace(/\/?$/, '');
+        appUrl = basePath + '/app/';
+      }
       document.querySelectorAll('.cta-app-link').forEach(function(el) {
         el.href = appUrl;
       });

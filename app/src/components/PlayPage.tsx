@@ -425,7 +425,7 @@ export default function PlayPage({ user }: Props) {
                 <span className="font-zh text-[13px] text-[#8A8580]/40">还没有安排，玩个小游戏添加吧</span>
               </div>
             )}
-            {agenda.map((item, i) => (
+            {agenda.map((item) => (
               <div
                 key={item.id}
                 className="flex items-center gap-3 py-2 border-b border-[#1A1A1A]/4 last:border-b-0 group/item"

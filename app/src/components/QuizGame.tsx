@@ -66,7 +66,7 @@ export default function QuizGame({ user, onAddItems, onEnd, onWaitBack, initialB
   const [otherSubmitted, setOtherSubmitted] = useState(false);
   const [addedItems, setAddedItems] = useState<string[]>([]);
 
-  const pollRef = useRef<ReturnType<typeof setInterval>>();
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   /* ---- 初始化：获取数据、判定阶段 ---- */
   const init = useCallback(async (bothReadyHint: boolean) => {
@@ -131,7 +131,7 @@ export default function QuizGame({ user, onAddItems, onEnd, onWaitBack, initialB
   /* ---- 等待期间轮询对方是否提交 ---- */
   useEffect(() => {
     if (phase !== 'waiting') {
-      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = undefined; }
+      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
       return;
     }
     pollRef.current = setInterval(async () => {
@@ -140,7 +140,7 @@ export default function QuizGame({ user, onAddItems, onEnd, onWaitBack, initialB
       const myEntry = entries.find(e => e.user_id === myRole && e.round === quizRound);
       if (otherEntry && myEntry) {
         clearInterval(pollRef.current!);
-        pollRef.current = undefined;
+        pollRef.current = null;
         const intersection = myEntry.picks.filter(p => otherEntry.picks.includes(p));
         setMatchItems(intersection);
         setSelectedItems([...intersection]);

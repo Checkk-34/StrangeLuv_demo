@@ -3,109 +3,62 @@
 ## 架构
 
 ```
-/              → 官网（landing page，纯静态 HTML）
+/              → 官网（landing page → index.html）
 /app/          → App（React SPA，Vite 构建产物）
 ```
 
 ---
 
-## 构建
+## 部署方式：GitHub Pages（推荐，免费）
+
+### 前置条件
+
+1. 代码已推送到 GitHub 仓库（当前：`Checkk-34/StrangeLuv_demo`）
+2. 已配置 GitHub Actions 工作流（`.github/workflows/deploy.yml`）
+
+### 启用步骤
+
+1. 在浏览器打开 GitHub 仓库页面
+2. 点击 **Settings** → **Pages**
+3. 在 **Source** 处选择 **GitHub Actions**
+4. 之后每次推送到 `main` 分支，GitHub Actions 会自动构建并部署
+5. 部署完成后，访问：
+   ```
+   https://checkk-34.github.io/StrangeLuv_demo/    → 官网首页
+   https://checkk-34.github.io/StrangeLuv_demo/app/ → App
+   ```
+
+### 手动触发部署
+
+在 GitHub 仓库 → **Actions** → **Deploy to GitHub Pages** → **Run workflow**
+
+---
+
+## 构建流程
 
 ```bash
 cd app
 
-# 1. 构建 App（输出到 dist/，资源路径为 /app/assets/...）
-npm run build
+# 构建（VITE_BASE_PATH 由构建脚本自动设置）
+bash build-deploy.sh
 
-# 2. 准备官网 + App 目录结构
-mkdir -p deploy/app
-Copy-Item landing.html deploy/index.html           # 官网入口
-Copy-Item dist/index.html deploy/app/              # App 入口
-Copy-Item -Recurse dist/assets deploy/app/assets/  # App 资源
-```
-
-最终 `deploy/` 目录结构：
-```
-deploy/
-├── index.html              ← 官网（由 landing.html 改名为 index.html）
-├── app/
-│   ├── index.html          ← App 入口
-│   └── assets/
-│       ├── index-xxx.js
-│       └── index-xxx.css
-```
-
-将 `deploy/` 部署到任意静态服务器即可。
-
----
-
-## 部署方式
-
-### 方式一：Cloudflare Pages（推荐，免费）
-
-1. 在 Cloudflare Dashboard → Pages → 创建项目
-2. 连接 GitHub 仓库，构建命令：
-   ```bash
-   cd app && npm run build
-   ```
-3. 构建输出目录：`app/dist`
-4. 添加重定向规则：
-   - 源 URL：`/` → 目标 URL：`/landing.html` → 状态：200
-
-### 方式二：nginx
-
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-
-    root /var/www/pond-date;
-    index index.html;
-
-    # / → 官网
-    location = / {
-        try_files /landing.html =404;
-    }
-
-    # /app/ → App（SPA 回退到 /app/index.html）
-    location /app/ {
-        try_files $uri $uri/ /app/index.html;
-    }
-}
-```
-
-### 方式三：Vercel
-
-1. 在 `app/` 下创建 `vercel.json`：
-
-```json
-{
-  "rewrites": [
-    { "source": "/app/(.*)", "destination": "/app/$1" },
-    { "source": "/(.*)", "destination": "/landing.html" }
-  ]
-}
-```
-
-### 方式四：本地预览
-
-```bash
-# 用 npx serve 同时托管官网和 App
-npx serve deploy/ -l 3000
-# → http://localhost:3000 官网
-# → http://localhost:3000/app/  App
+# 输出在 app/dist/
+# ├── index.html    ← 官网 landing.html（重命名）
+# ├── app/
+# │   ├── index.html ← App SPA 入口
+# │   └── assets/
+# └── 404.html      ← SPA fallback
 ```
 
 ---
 
-## 开发工作流
+## 本地预览
 
 ```bash
-# 终端 1：App 开发服务器
 cd app && npm run dev
-# → http://localhost:5173
+# → http://localhost:5173（App 开发服务器）
 
-# 直接双击 app/landing.html
+# 或直接双击 app/landing.html
 # CTA 按钮自动检测环境 → 链接到 http://localhost:5173
 ```
 
@@ -119,4 +72,5 @@ cd app && npm run dev
 |------|-------------|
 | 双击打开（file://） | `http://localhost:5173` |
 | localhost 开发 | `http://localhost:5173` |
-| 生产部署 | `/app/` |
+| GitHub Pages | `/{repo}/app/`（自动检测） |
+| 自定义域名 | `/app/`（自动检测） |
