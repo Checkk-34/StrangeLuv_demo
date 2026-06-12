@@ -93,6 +93,7 @@ export async function deleteActivity(id: number): Promise<void> {
 export interface QuizEntry {
   date: string;
   user_id: string;
+  round: number;
   picks: string[];
   done?: boolean;
 }
@@ -105,17 +106,16 @@ export async function fetchQuiz(date: string): Promise<QuizEntry[]> {
     .from('quiz_results')
     .select('*')
     .eq('date', date);
-  return (data || []).map((r: any) => ({ date: r.date, user_id: r.user_id, picks: r.picks, done: r.done ?? false }));
+  return (data || []).map((r: any) => ({ date: r.date, user_id: r.user_id, round: r.round ?? 1, picks: r.picks, done: r.done ?? false }));
 }
 
 /** 提交问卷 */
-export async function submitQuiz(date: string, userId: string, picks: string[]): Promise<void> {
+export async function submitQuiz(date: string, userId: string, picks: string[], round: number = 1): Promise<void> {
   const sb = getSupabase();
   if (!sb) return;
-  // upsert: 同一天同一个人只能提交一次，初始化 done=false
   await sb.from('quiz_results').upsert(
-    { date, user_id: userId, picks, done: false },
-    { onConflict: 'date,user_id' },
+    { date, user_id: userId, round, picks, done: false },
+    { onConflict: 'date,user_id,round' },
   );
 }
 

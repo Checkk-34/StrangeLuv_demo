@@ -63,7 +63,7 @@ export default function QuizGame({ user, onAddItems, onEnd, onWaitBack, initialB
   const myRole = user.username as 'fish' | 'frog';
   const otherRole: 'fish' | 'frog' = myRole === 'fish' ? 'frog' : 'fish';
 
-  const [round, setRound] = useState(0);
+  const [quizRound, setQuizRound] = useState(0);
   const [phase, setPhase] = useState<Phase>('checking');
   const [picks, setPicks] = useState<string[]>([]);
   const [matchItems, setMatchItems] = useState<string[]>([]);
@@ -76,8 +76,15 @@ export default function QuizGame({ user, onAddItems, onEnd, onWaitBack, initialB
   /* ---- 初始化：获取数据、判定阶段 ---- */
   const init = useCallback(async (bothReadyHint: boolean) => {
     const entries = await fetchQuiz(todayStr());
-    const myEntry = entries.find(e => e.user_id === myRole);
-    const otherEntry = entries.find(e => e.user_id === otherRole);
+
+    // 确定当前轮次：取所有 entries 的最大 round
+    const maxRound = Math.max(1, ...entries.map(e => e.round));
+
+    // 只匹配当前轮次的数据
+    const myEntry = entries.find(e => e.user_id === myRole && e.round === maxRound);
+    const otherEntry = entries.find(e => e.user_id === otherRole && e.round === maxRound);
+
+    setQuizRound(maxRound);
 
     if (bothReadyHint && myEntry && otherEntry && !myEntry.done) {
       // 双方数据都在且未完成 → 直接展示交集结果
@@ -91,14 +98,16 @@ export default function QuizGame({ user, onAddItems, onEnd, onWaitBack, initialB
     }
 
     if (myEntry?.done) {
-      // 已完成的旧轮 → 开新轮（保留对方数据）
+      // 我的本轮已完成 → 开新轮
+      const newRound = maxRound + 1;
+      setQuizRound(newRound);
       setPicks([]);
       setPhase('pick');
       return;
     }
 
     if (myEntry && otherEntry) {
-      // 双方都提交了 → 结果
+      // 双方都在本轮提交了 → 结果
       const intersection = myEntry.picks.filter(p => otherEntry.picks.includes(p));
       setPicks(myEntry.picks);
       setMatchItems(intersection);
@@ -122,7 +131,7 @@ export default function QuizGame({ user, onAddItems, onEnd, onWaitBack, initialB
     init(!!initialBothReady);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [init, round]);
+  }, [init]);
 
   /* ---- 等待期间轮询对方是否提交 ---- */
   useEffect(() => {
@@ -132,8 +141,8 @@ export default function QuizGame({ user, onAddItems, onEnd, onWaitBack, initialB
     }
     pollRef.current = setInterval(async () => {
       const entries = await fetchQuiz(todayStr());
-      const otherEntry = entries.find(e => e.user_id === otherRole);
-      const myEntry = entries.find(e => e.user_id === myRole);
+      const otherEntry = entries.find(e => e.user_id === otherRole && e.round === quizRound);
+      const myEntry = entries.find(e => e.user_id === myRole && e.round === quizRound);
       if (otherEntry && myEntry) {
         clearInterval(pollRef.current!);
         pollRef.current = undefined;
@@ -146,7 +155,7 @@ export default function QuizGame({ user, onAddItems, onEnd, onWaitBack, initialB
       }
     }, 3000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, [phase, otherRole, myRole]);
+  }, [phase, otherRole, myRole, quizRound]);
 
   /* ---- 选择 / 提交 ---- */
   const togglePick = useCallback((opt: string) => {
@@ -155,10 +164,10 @@ export default function QuizGame({ user, onAddItems, onEnd, onWaitBack, initialB
 
   async function handleSubmit() {
     if (picks.length === 0) return;
-    await submitQuiz(todayStr(), myRole, picks);
-    // 提交后检查对方是否已有数据
+    await submitQuiz(todayStr(), myRole, picks, quizRound);
+    // 提交后检查对方是否在本次轮有数据
     const entries = await fetchQuiz(todayStr());
-    const otherEntry = entries.find(e => e.user_id === otherRole);
+    const otherEntry = entries.find(e => e.user_id === otherRole && e.round === quizRound);
     if (otherEntry) {
       const intersection = picks.filter(p => otherEntry.picks.includes(p));
       setMatchItems(intersection);

@@ -231,8 +231,9 @@ export default function PlayPage({ user }: Props) {
 
     const check = () => {
       fetchQuiz(todayStr()).then((entries) => {
-        const myEntry = entries.find((e) => e.user_id === user.username);
-        const other = entries.find((e) => e.user_id !== user.username);
+        const currentRound = Math.max(1, ...entries.map(e => e.round));
+        const myEntry = entries.find((e) => e.user_id === user.username && e.round === currentRound);
+        const other = entries.find((e) => e.user_id !== user.username && e.round === currentRound);
         setOtherReady(!!other && !myEntry);
         setQuizBothReady(!!myEntry && !!other);
         if (!!myEntry && !!other && !dontShowBadge && !showBothBadge && !myEntry.done) {

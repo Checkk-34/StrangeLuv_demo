@@ -37,9 +37,10 @@ CREATE TABLE IF NOT EXISTS quiz_results (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   date TEXT NOT NULL,                    -- '2026-06-11'
   user_id TEXT NOT NULL,                 -- 'fish' | 'frog'
+  round INTEGER NOT NULL DEFAULT 1,     -- 轮次编号，每轮递增
   picks JSONB NOT NULL,                  -- ["看电影","吃火锅"]
-  done BOOLEAN NOT NULL DEFAULT false,   -- 是否已完成（双方都完成后自动清理）
-  UNIQUE (date, user_id)
+  done BOOLEAN NOT NULL DEFAULT false,   -- 是否已完成
+  UNIQUE (date, user_id, round)
 );
 
 ALTER TABLE quiz_results ENABLE ROW LEVEL SECURITY;
