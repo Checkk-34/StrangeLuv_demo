@@ -94,6 +94,7 @@ export interface QuizEntry {
   date: string;
   user_id: string;
   picks: string[];
+  done?: boolean;
 }
 
 /** 获取某天的问卷结果 */
@@ -104,18 +105,41 @@ export async function fetchQuiz(date: string): Promise<QuizEntry[]> {
     .from('quiz_results')
     .select('*')
     .eq('date', date);
-  return (data || []).map((r: any) => ({ date: r.date, user_id: r.user_id, picks: r.picks }));
+  return (data || []).map((r: any) => ({ date: r.date, user_id: r.user_id, picks: r.picks, done: r.done ?? false }));
 }
 
 /** 提交问卷 */
 export async function submitQuiz(date: string, userId: string, picks: string[]): Promise<void> {
   const sb = getSupabase();
   if (!sb) return;
-  // upsert: 同一天同一个人只能提交一次
+  // upsert: 同一天同一个人只能提交一次，初始化 done=false
   await sb.from('quiz_results').upsert(
-    { date, user_id: userId, picks },
+    { date, user_id: userId, picks, done: false },
     { onConflict: 'date,user_id' },
   );
+}
+
+/** 标记当前用户完成，若双方都完成则自动清理当天数据 */
+export async function markQuizDone(date: string, userId: string): Promise<boolean> {
+  const sb = getSupabase();
+  if (!sb) return false;
+  // 标记当前用户 done=true
+  await sb.from('quiz_results').update({ done: true }).match({ date, user_id: userId });
+  // 检查是否所有 entry 都已 done
+  const { data } = await sb.from('quiz_results').select('done').eq('date', date);
+  const allDone = data && data.length > 0 && data.every(r => r.done === true);
+  if (allDone) {
+    await sb.from('quiz_results').delete().eq('date', date);
+    return true; // 已清理
+  }
+  return false;
+}
+
+/** 删除某天所有问卷数据（用于开新轮） */
+export async function deleteQuiz(date: string): Promise<void> {
+  const sb = getSupabase();
+  if (!sb) return;
+  await sb.from('quiz_results').delete().eq('date', date);
 }
 
 // =============================================

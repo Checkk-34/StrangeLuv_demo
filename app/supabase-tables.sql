@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS quiz_results (
   date TEXT NOT NULL,                    -- '2026-06-11'
   user_id TEXT NOT NULL,                 -- 'fish' | 'frog'
   picks JSONB NOT NULL,                  -- ["看电影","吃火锅"]
+  done BOOLEAN NOT NULL DEFAULT false,   -- 是否已完成（双方都完成后自动清理）
   UNIQUE (date, user_id)
 );
 

@@ -6,12 +6,17 @@ import WheelGame from './WheelGame';
 import SlotsGame from './SlotsGame';
 import QuizGame from './QuizGame';
 import BreathingPanel from './BreathingPanel';
-import { WheelIcon, SlotIcon, HeartIcon, NoteIcon, PinIcon, CloseIcon } from './Icons';
-import { fetchActivities, addActivity, deleteActivity as deleteActivityApi, type User } from '../lib/auth';
+import { WheelIcon, SlotIcon, HeartIcon, NoteIcon, PinIcon, CloseIcon, FishIcon, FrogIcon, CheckCircleIcon } from './Icons';
+import { fetchActivities, addActivity, deleteActivity as deleteActivityApi, fetchQuiz, markQuizDone, type User } from '../lib/auth';
 
 /* ---------- helpers ---------- */
 function cn(...classes: (string | false | undefined | null)[]) {
   return classes.filter(Boolean).join(' ');
+}
+
+function todayStr(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 /* ---------- tab config ---------- */
@@ -66,7 +71,14 @@ interface Props {
 }
 
 /** Tab 内容卡片 — 用 key 驱动 GSAP 入场 */
-function TabCard({ tab, onStart }: { tab: TabDef; onStart: () => void }) {
+function TabCard({ tab, onStart, otherReady, username, quizSubmitted, showBothBadge }: {
+  tab: TabDef;
+  onStart: () => void;
+  otherReady?: boolean;
+  username: string;
+  quizSubmitted?: boolean;
+  showBothBadge?: boolean;
+}) {
   const cardRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
@@ -81,6 +93,35 @@ function TabCard({ tab, onStart }: { tab: TabDef; onStart: () => void }) {
 
   return (
     <div ref={cardRef} className="flex flex-col items-center text-center">
+      {/* 双方已提交 → 可查看结果 */}
+      {showBothBadge && tab.key === 'quiz' && (
+        <div className="mb-4 px-5 py-3 rounded-2xl bg-[#1A1A1A]/70 text-white text-[13px] font-zh animate-ripple-in" style={{ animationFillMode: 'both' }}>
+          <span className="block mb-1">
+            <CheckCircleIcon size={16} className="inline-block -mt-0.5 align-middle mr-1 text-frog-emerald" />
+            {username === 'fish' ? '蛙蛙' : '小鱼'}已选择 · 默契结果已生成
+          </span>
+          <span className="text-[12px] text-white/60">点击开始查看并添加到安排</span>
+        </div>
+      )}
+
+      {/* 已提交等待对方 */}
+      {quizSubmitted && tab.key === 'quiz' && !showBothBadge && (
+        <div className="mb-4 px-5 py-3 rounded-2xl bg-[#1A1A1A]/60 text-white text-[13px] font-zh animate-ripple-in" style={{ animationFillMode: 'both' }}>
+          <span className="block mb-1">
+            <HeartIcon size={16} className="inline-block -mt-0.5 align-middle mr-1" />
+            已提交，等{username === 'fish' ? '蛙蛙' : '小鱼'}选择中
+          </span>
+          <span className="text-[12px] text-white/50">选完后会自动匹配默契结果</span>
+        </div>
+      )}
+
+      {/* 对方已提交提示 */}
+      {otherReady && tab.key === 'quiz' && !quizSubmitted && !showBothBadge && (
+        <div className="mb-4 px-5 py-3 rounded-2xl bg-[#002FA7] text-white text-[13px] font-zh animate-pop-bounce" style={{ animationFillMode: 'both' }}>
+          {username === 'fish' ? <FrogIcon size={18} className="inline-block -mt-0.5 align-middle mr-1.5 brightness-0 invert" /> : <FishIcon size={18} className="inline-block -mt-0.5 align-middle mr-1.5 brightness-0 invert" />}
+          {username === 'fish' ? '蛙蛙' : '小鱼'} 在等你 · 快去选择吧
+        </div>
+      )}
       <div
         className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
         style={{ backgroundColor: `${tab.accent}12`, color: tab.accent }}
@@ -120,6 +161,11 @@ export default function PlayPage({ user }: Props) {
   const [agenda, setAgenda] = useState<AgendaItem[]>([]);
   const [inputText, setInputText] = useState('');
   const [loadingAgenda, setLoadingAgenda] = useState(false);
+  const [otherReady, setOtherReady] = useState(false);
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [quizBothReady, setQuizBothReady] = useState(false);
+  const [showBothBadge, setShowBothBadge] = useState(false);
+  const [dontShowBadge, setDontShowBadge] = useState(false);
 
   const pageRef = useRef<HTMLDivElement>(null);
   const gameEnterRef = useRef(false);
@@ -179,15 +225,52 @@ export default function PlayPage({ user }: Props) {
     }
   }, [activeIndex, pageIndex, agenda.length, loadingAgenda]);
 
+  /* ---- 检测对方问卷提交状态（用于卡片提示），每 5s 轮询 ---- */
+  useEffect(() => {
+    if (tab !== 'quiz') return;
+
+    const check = () => {
+      fetchQuiz(todayStr()).then((entries) => {
+        const myEntry = entries.find((e) => e.user_id === user.username);
+        const other = entries.find((e) => e.user_id !== user.username);
+        setOtherReady(!!other && !myEntry);
+        setQuizBothReady(!!myEntry && !!other);
+        if (!!myEntry && !!other && !dontShowBadge && !showBothBadge && !myEntry.done) {
+          setShowBothBadge(true);
+        }
+      });
+    };
+
+    check();
+    const timer = setInterval(check, 5000);
+    return () => clearInterval(timer);
+  }, [tab, user.username, currentGame]);
+
   /* ---- 游戏生命周期 ---- */
   function handleStartGame(key: string) {
+    if (key === 'quiz') {
+      setQuizSubmitted(false);
+      setShowBothBadge(false);
+      setDontShowBadge(false);
+      setQuizBothReady(false);
+    }
     setCurrentGame(key);
     setView('game');
   }
 
   function handleGameEnd() {
     setCurrentGame('');
+    setQuizBothReady(false);
     setView('visible');
+  }
+
+  async function handleQuizEnd() {
+    setDontShowBadge(true);
+    setShowBothBadge(false);
+    setCurrentGame('');
+    setQuizBothReady(false);
+    setView('visible');
+    await markQuizDone(todayStr(), user.username);
   }
 
   async function addAgendaItem(text: string) {
@@ -197,7 +280,8 @@ export default function PlayPage({ user }: Props) {
   }
 
   async function addAgendaItems(items: string[]) {
-    for (const text of items) await addActivity(user.username, text, currentGame || 'quiz');
+    // 全部并行写入，后台跑完再刷新列表
+    await Promise.all(items.map(text => addActivity(user.username, text, currentGame || 'quiz')));
     const data = await fetchActivities();
     setAgenda(data.map((a) => ({ id: a.id!, text: a.text, source: a.source, user_id: a.user_id })));
   }
@@ -223,28 +307,27 @@ export default function PlayPage({ user }: Props) {
   const currentTabDef = TABS.find(t => t.key === tab)!;
 
   /* ════════════════════════════════════════
-     游戏全屏模式
+     游戏全屏模式（同 ref → React 回收 DOM，无空窗）
      ════════════════════════════════════════ */
   if (inGame) {
     return (
-      <div ref={pageRef} className="relative h-full w-full flex flex-col" data-game-root>
+      <div ref={pageRef} className="relative h-full w-full flex flex-col bg-[#FFB7C5]" data-game-root>
         {currentGame === 'wheel' && <WheelGame onAddItem={addAgendaItem} onEnd={handleGameEnd} />}
         {currentGame === 'slots' && <SlotsGame onAddItem={addAgendaItem} onEnd={handleGameEnd} />}
-        {currentGame === 'quiz' && <QuizGame onAddItems={addAgendaItems} onEnd={handleGameEnd} />}
+        {currentGame === 'quiz' && <QuizGame user={user} onAddItems={addAgendaItems} onEnd={handleQuizEnd} onWaitBack={() => { setQuizSubmitted(true); setCurrentGame(''); setView('visible'); }} initialBothReady={quizBothReady} />}
       </div>
     );
   }
 
   /* ════════════════════════════════════════
-     主界面 — Tab 导航 + 游戏卡 + 活动清单
+     主界面（同 ref + 同 bg → 过渡无变化）
      ════════════════════════════════════════ */
   return (
     <div
       ref={pageRef}
-      className="relative h-full w-full flex flex-col px-6 md:px-8 py-6 overflow-hidden"
+      className="relative h-full w-full flex flex-col px-6 md:px-8 py-6 overflow-hidden bg-[#FFB7C5]"
     >
-      {/* 游戏符号呼吸粒子背景 */}
-      <BreathingPanel color="rgba(232,131,80," speed={0.8} density={0.15} blendMode="screen" palette="♠♥♦♣★☆◆◇◎◈" />
+      <BreathingPanel color="rgba(200,100,130," speed={0.7} density={0.50} blendMode="multiply" interactive />
       {/* ===== 顶部标识 ===== */}
       <div className="flex items-center gap-3 mb-6 shrink-0">
         <span className="font-en text-[11px] font-semibold tracking-[0.15em] text-[#E88350]">
@@ -287,7 +370,7 @@ export default function PlayPage({ user }: Props) {
 
       {/* ===== 内容区（key=tab 驱动 GSAP 入场） ===== */}
       <div className="flex-1 flex flex-col justify-center min-h-0 py-6 md:py-8" key={tab}>
-        <TabCard tab={currentTabDef} onStart={() => handleStartGame(tab)} />
+        <TabCard tab={currentTabDef} onStart={() => handleStartGame(tab)} otherReady={otherReady} username={user.username} quizSubmitted={quizSubmitted} showBothBadge={showBothBadge} />
       </div>
 
       {/* ===== 今日安排 — 瑞士风账本 ===== */}
