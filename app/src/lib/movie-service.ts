@@ -3,6 +3,7 @@ import { getCachedMovies, type MovieItem } from './supabase';
 export type { MovieItem }; // re-export for consumers
 
 const DAILY_KEY = 'pond-daily-movies';
+const MOVIES_CACHE_KEY = 'pond-movies-data';
 
 interface DailyCache {
   date: string;        // '2026-06-11'
@@ -47,31 +48,59 @@ function writeDaily(date: string, ids: number[]) {
 
 /** 清空每日缓存（强制下次重新随机） */
 export function clearDailyCache() {
-  try { localStorage.removeItem(DAILY_KEY); } catch { /* ignore */ }
+  try { localStorage.removeItem(DAILY_KEY); localStorage.removeItem(MOVIES_CACHE_KEY); } catch { /* ignore */ }
+}
+
+/** 读 localStorage 中的完整影片数据缓存 */
+function readMoviesData(date: string): MovieItem[] | null {
+  try {
+    const raw = localStorage.getItem(MOVIES_CACHE_KEY);
+    if (!raw) return null;
+    const { d, ids } = JSON.parse(raw);
+    if (d !== date) return null;
+    // ids 是 map: { [tmdb_id]: MovieItem }
+    return Object.values(ids) as MovieItem[];
+  } catch { return null; }
+}
+
+/** 写完整影片数据到 localStorage */
+function writeMoviesData(date: string, movies: MovieItem[]) {
+  try {
+    const ids: Record<number, MovieItem> = {};
+    for (const m of movies) ids[m.tmdb_id] = m;
+    localStorage.setItem(MOVIES_CACHE_KEY, JSON.stringify({ d: date, ids }));
+  } catch { /* ignore */ }
 }
 
 /**
  * 从 Supabase 池子中挑选 8 部电影
  * - 当天第一次调用：随机取 8 部，存 localStorage
- * - 当天后续调用：直接返回缓存的 8 部（不变）
+ * - 当天后续调用：直接返回缓存（含完整影片数据，无需 Supabase 查询）
  * - 手动换一批：调用 pickRandom() 覆盖当天缓存
  * - 第二天：自动重新随机
  */
 export async function getMovies(): Promise<MovieItem[]> {
   try {
+    const today = todayStr();
+
+    // 先读 localStorage 完整缓存 → 立即显示
+    const dataCache = readMoviesData(today);
+    if (dataCache) return dataCache;
+
+    // 无缓存 → 走 Supabase
     const cached = await getCachedMovies('popular');
     if (!cached || !Array.isArray(cached.data) || cached.data.length === 0) return [];
     const pool: MovieItem[] = cached.data;
-    const today = todayStr();
     const daily = readDaily();
 
-    // 当天已有缓存 → 按缓存的 tmdb_id 取出，不移位
+    // 当天已有 ID 缓存 → 从池子中取出
     if (daily && daily.date === today) {
       const idSet = new Set(daily.ids);
       const selected = pool.filter((m) => idSet.has(m.tmdb_id));
-      // 若缓存中的 ID 在最新池子里都找得到，直接返回
-      if (selected.length === daily.ids.length) return selected;
-      // 池子变了（管理员刚刚 refresh-movies 了），回退到重新随机
+      if (selected.length === daily.ids.length) {
+        writeMoviesData(today, selected); // 写入完整缓存供下次秒开
+        return selected;
+      }
     }
 
     // 随机取 8 部并缓存
@@ -91,7 +120,7 @@ export async function pickRandom(): Promise<MovieItem[]> {
   return pickAndSave(cached.data, todayStr(), false);
 }
 
-/** 洗牌取 8 + 写 localStorage */
+/** 洗牌取 8 + 写 localStorage（id 列表 + 完整数据） */
 function pickAndSave(pool: MovieItem[], date: string, seeded = true): MovieItem[] {
   const rng = seeded ? createSeededRandom(date) : () => Math.random();
   const shuffled = [...pool];
@@ -101,5 +130,6 @@ function pickAndSave(pool: MovieItem[], date: string, seeded = true): MovieItem[
   }
   const picked = shuffled.slice(0, 8);
   writeDaily(date, picked.map((m) => m.tmdb_id));
+  writeMoviesData(date, picked);
   return picked;
 }

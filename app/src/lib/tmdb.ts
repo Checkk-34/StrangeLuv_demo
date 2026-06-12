@@ -1,7 +1,7 @@
 import type { MovieItem } from './supabase';
 
 const BASE = 'https://api.themoviedb.org/3';
-const IMG_BASE = 'https://image.tmdb.org/t/p/w185';
+const IMG_BASE = 'https://image.tmdb.org/t/p/w342';
 
 interface TMDBMovie {
   id: number;

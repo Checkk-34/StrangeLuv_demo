@@ -10,6 +10,8 @@ import { WheelIcon, SlotIcon, HeartIcon, NoteIcon, PinIcon, CloseIcon, FishIcon,
 import { fetchActivities, addActivity, deleteActivity as deleteActivityApi, fetchQuiz, markQuizDone, type User } from '../lib/auth';
 
 /* ---------- helpers ---------- */
+const AGENDA_CACHE_KEY = 'pond-agenda-cache';
+
 function cn(...classes: (string | false | undefined | null)[]) {
   return classes.filter(Boolean).join(' ');
 }
@@ -215,26 +217,38 @@ export default function PlayPage({ user }: Props) {
     }
   }, [view]);
 
-  /* ---- 加载活动清单（有缓存时立即显示） ---- */
+  /* ---- 加载活动清单（本地缓存秒开 + Supabase 后台同步） ---- */
   useEffect(() => {
     if (activeIndex === pageIndex && agenda.length === 0 && !loadingAgenda) {
-      // 内存缓存 → 立即显示
-      if (agendaCacheRef.current && agendaCacheRef.current.length > 0) {
-        setAgenda(agendaCacheRef.current);
-      }
+      // localStorage 缓存 → 立即显示
+      try {
+        const raw = localStorage.getItem(AGENDA_CACHE_KEY);
+        if (raw) {
+          const cached = JSON.parse(raw);
+          if (Array.isArray(cached) && cached.length > 0) {
+            setAgenda(cached);
+            agendaCacheRef.current = cached;
+          }
+        }
+      } catch { /* ignore */ }
+
       setLoadingAgenda(true);
       fetchActivities().then((data) => {
         const items = data.map((a) => ({ id: a.id!, text: a.text, source: a.source, user_id: a.user_id }));
         agendaCacheRef.current = items;
         setAgenda(items);
         setLoadingAgenda(false);
+        try { localStorage.setItem(AGENDA_CACHE_KEY, JSON.stringify(items)); } catch { /* ignore */ }
       });
     }
   }, [activeIndex, pageIndex, agenda.length, loadingAgenda]);
 
-  /* ---- 同步 agenda 到内存缓存 ---- */
+  /* ---- 同步 agenda 到缓存 ---- */
   useEffect(() => {
-    if (agenda.length > 0) agendaCacheRef.current = agenda;
+    if (agenda.length > 0) {
+      agendaCacheRef.current = agenda;
+      try { localStorage.setItem(AGENDA_CACHE_KEY, JSON.stringify(agenda)); } catch { /* ignore */ }
+    }
   }, [agenda]);
 
   /* ---- 检测对方问卷提交状态（用于卡片提示），每 5s 轮询 ---- */
