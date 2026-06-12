@@ -9,7 +9,7 @@ interface Props {
 }
 
 /**
- * 垂直滑页容器 — transform + transition 驱动
+ * 垂直滑页容器 — CSS transition 驱动（合成器线程），transitionend 精确回调
  * 每页 100dvh - peek，底部的 peek 空间露出下一页顶部边界
  * 动画曲线从 PPT 瑞士风翻页移植: cubic-bezier(.77,0,.175,1)
  */
@@ -32,6 +32,11 @@ export default function PageSlider({ children, labels, peek = 56 }: Props) {
   const step = Math.max(0, vh - peek);
   const offset = current * step;
 
+  // transitionend 解锁 — 替代 setTimeout 消除竞态
+  const onTransitionEnd = useCallback(() => {
+    setAnimating(false);
+  }, []);
+
   const goTo = useCallback(
     (idx: number) => {
       if (animating) return;
@@ -39,7 +44,6 @@ export default function PageSlider({ children, labels, peek = 56 }: Props) {
       if (next === current) return;
       setAnimating(true);
       setCurrent(next);
-      setTimeout(() => setAnimating(false), 900); // 匹配 transition 时长
     },
     [animating, current, total],
   );
@@ -107,16 +111,15 @@ export default function PageSlider({ children, labels, peek = 56 }: Props) {
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      {/* 滑轨 */}
+      {/* 滑轨 — transition 始终开启，避免同帧切换 transition 属性导致过渡丢失 */}
       <div
         ref={trackRef}
         className="will-change-transform"
         style={{
           transform: `translateY(-${offset}px)`,
-          transition: animating
-            ? 'transform 0.9s cubic-bezier(.77,0,.175,1)'
-            : 'none',
+          transition: 'transform 0.9s cubic-bezier(.77,0,.175,1)',
         }}
+        onTransitionEnd={onTransitionEnd}
       >
         {children.map((child, i) => (
           <PageContext.Provider key={i} value={{ pageIndex: i, activeIndex: current }}>

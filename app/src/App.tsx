@@ -22,7 +22,7 @@ export default function App() {
 
   const bgLayer = (
     <>
-      <BreathingPanel color="rgba(200,70,80," speed={0.5} density={0.22} blendMode="multiply" />
+      <BreathingPanel color="rgba(200,70,80," speed={0.5} density={0.22} blendMode="multiply" interactive />
       {/* 噪点纹理 */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.030] z-[1]"

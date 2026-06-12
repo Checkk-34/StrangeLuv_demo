@@ -1,4 +1,6 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { PageContext } from './PageContext';
 import WheelGame from './WheelGame';
 import SlotsGame from './SlotsGame';
@@ -63,14 +65,64 @@ interface Props {
   user: User;
 }
 
+/** Tab 内容卡片 — 用 key 驱动 GSAP 入场 */
+function TabCard({ tab, onStart }: { tab: TabDef; onStart: () => void }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    if (cardRef.current) {
+      gsap.fromTo(
+        cardRef.current,
+        { x: 40, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.4, ease: 'power2.out', clearProps: 'transform' },
+      );
+    }
+  }, { scope: cardRef });
+
+  return (
+    <div ref={cardRef} className="flex flex-col items-center text-center">
+      <div
+        className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
+        style={{ backgroundColor: `${tab.accent}12`, color: tab.accent }}
+      >
+        {tab.icon}
+      </div>
+      <h2 className="font-zh text-[min(6vw,32px)] font-light tracking-[-0.02em] text-[#1A1A1A] mb-1">
+        {tab.label}
+      </h2>
+      <span className="font-en text-[10px] tracking-[0.22em] text-[#8A8580]/50 font-medium uppercase mb-4">
+        {tab.sub}
+      </span>
+      <p className="font-zh text-[14px] text-[#8A8580] font-light max-w-[28ch] leading-relaxed mb-8">
+        {tab.desc}
+      </p>
+      <button
+        onClick={onStart}
+        className="group inline-flex items-center gap-2 px-8 py-3 border border-[#1A1A1A]/20
+          text-[13px] font-zh font-medium text-[#1A1A1A]
+          transition-all duration-300 ease-out
+          hover:border-[#1A1A1A]/50 hover:bg-[#1A1A1A] hover:text-white"
+      >
+        <span>开始</span>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+          <path d="M3 8h10M8 3l5 5-5 5" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 export default function PlayPage({ user }: Props) {
   const { pageIndex, activeIndex } = useContext(PageContext);
   const [view, setView] = useState<View>('idle');
-  const [tab, setTab] = useState<string>('quiz');    // active tab
+  const [tab, setTab] = useState<string>('quiz');
   const [currentGame, setCurrentGame] = useState<string>('');
   const [agenda, setAgenda] = useState<AgendaItem[]>([]);
   const [inputText, setInputText] = useState('');
   const [loadingAgenda, setLoadingAgenda] = useState(false);
+
+  const pageRef = useRef<HTMLDivElement>(null);
+  const gameEnterRef = useRef(false);
 
   /* ---- 页面进出 ---- */
   useEffect(() => {
@@ -83,6 +135,38 @@ export default function PlayPage({ user }: Props) {
       const t = setTimeout(() => setView('idle'), 400); return () => clearTimeout(t);
     }
   }, [activeIndex, pageIndex, view]);
+
+  /* ---- GSAP 页面入场 ---- */
+  useGSAP(() => {
+    if (view === 'visible' && pageRef.current) {
+      gsap.fromTo(
+        pageRef.current,
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', clearProps: 'transform' },
+      );
+    }
+  }, { dependencies: [view], scope: pageRef });
+
+  /* ---- 游戏模式入场 elastic ---- */
+  useEffect(() => {
+    if (view === 'game' && !gameEnterRef.current) {
+      gameEnterRef.current = true;
+      // GSAP 在下一个 tick 作用于游戏容器
+      requestAnimationFrame(() => {
+        const gameEl = pageRef.current?.querySelector('[data-game-root]');
+        if (gameEl) {
+          gsap.fromTo(
+            gameEl,
+            { scale: 0.85, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.7)' },
+          );
+        }
+      });
+    }
+    if (view !== 'game') {
+      gameEnterRef.current = false;
+    }
+  }, [view]);
 
   /* ---- 加载活动清单 ---- */
   useEffect(() => {
@@ -134,16 +218,16 @@ export default function PlayPage({ user }: Props) {
 
   if (view === 'idle') return null;
 
-  const visible = view === 'visible';
   const inGame = view === 'game';
   const activeAccent = TABS.find(t => t.key === tab)?.accent ?? '#E88350';
+  const currentTabDef = TABS.find(t => t.key === tab)!;
 
   /* ════════════════════════════════════════
      游戏全屏模式
      ════════════════════════════════════════ */
   if (inGame) {
     return (
-      <div className="relative h-full w-full flex flex-col animate-swiss-fade">
+      <div ref={pageRef} className="relative h-full w-full flex flex-col" data-game-root>
         {currentGame === 'wheel' && <WheelGame onAddItem={addAgendaItem} onEnd={handleGameEnd} />}
         {currentGame === 'slots' && <SlotsGame onAddItem={addAgendaItem} onEnd={handleGameEnd} />}
         {currentGame === 'quiz' && <QuizGame onAddItems={addAgendaItems} onEnd={handleGameEnd} />}
@@ -155,10 +239,10 @@ export default function PlayPage({ user }: Props) {
      主界面 — Tab 导航 + 游戏卡 + 活动清单
      ════════════════════════════════════════ */
   return (
-      <div className={cn(
-      "relative h-full w-full flex flex-col px-6 md:px-8 py-6 overflow-hidden transition-opacity duration-500",
-      visible ? "opacity-100" : "opacity-0"
-    )}>
+    <div
+      ref={pageRef}
+      className="relative h-full w-full flex flex-col px-6 md:px-8 py-6 overflow-hidden"
+    >
       {/* 游戏符号呼吸粒子背景 */}
       <BreathingPanel color="rgba(232,131,80," speed={0.8} density={0.15} blendMode="screen" palette="♠♥♦♣★☆◆◇◎◈" />
       {/* ===== 顶部标识 ===== */}
@@ -185,8 +269,8 @@ export default function PlayPage({ user }: Props) {
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
-                "relative px-5 py-3 font-zh text-[13px] font-medium transition-colors duration-200",
-                isActive ? "text-[#1A1A1A]" : "text-[#8A8580]/60 hover:text-[#8A8580]"
+                'relative px-5 py-3 font-zh text-[13px] font-medium transition-colors duration-200',
+                isActive ? 'text-[#1A1A1A]' : 'text-[#8A8580]/60 hover:text-[#8A8580]',
               )}
             >
               {t.label}
@@ -201,56 +285,13 @@ export default function PlayPage({ user }: Props) {
         })}
       </div>
 
-      {/* ===== 内容区 ===== */}
-      <div className="flex-1 flex flex-col justify-center min-h-0 py-6 md:py-8">
-        {TABS.map((t) => {
-          if (t.key !== tab) return null;
-          return (
-            <div
-              key={t.key}
-              className="flex flex-col items-center text-center animate-swiss-fade"
-            >
-              {/* 图标 */}
-              <div
-                className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
-                style={{ backgroundColor: `${t.accent}12`, color: t.accent }}
-              >
-                {t.icon}
-              </div>
-
-              {/* 标题 */}
-              <h2 className="font-zh text-[min(6vw,32px)] font-light tracking-[-0.02em] text-[#1A1A1A] mb-1">
-                {t.label}
-              </h2>
-              <span className="font-en text-[10px] tracking-[0.22em] text-[#8A8580]/50 font-medium uppercase mb-4">
-                {t.sub}
-              </span>
-
-              {/* 描述 */}
-              <p className="font-zh text-[14px] text-[#8A8580] font-light max-w-[28ch] leading-relaxed mb-8">
-                {t.desc}
-              </p>
-
-              {/* 开始按钮 — 瑞士风极简按钮 */}
-              <button
-                onClick={() => handleStartGame(t.key)}
-                className="group inline-flex items-center gap-2 px-8 py-3 border border-[#1A1A1A]/20
-                  text-[13px] font-zh font-medium text-[#1A1A1A]
-                  transition-all duration-300 ease-out
-                  hover:border-[#1A1A1A]/50 hover:bg-[#1A1A1A] hover:text-white"
-              >
-                <span>开始</span>
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                  <path d="M3 8h10M8 3l5 5-5 5" />
-                </svg>
-              </button>
-            </div>
-          );
-        })}
+      {/* ===== 内容区（key=tab 驱动 GSAP 入场） ===== */}
+      <div className="flex-1 flex flex-col justify-center min-h-0 py-6 md:py-8" key={tab}>
+        <TabCard tab={currentTabDef} onStart={() => handleStartGame(tab)} />
       </div>
 
       {/* ===== 今日安排 — 瑞士风账本 ===== */}
-      <div className="shrink-0 animate-swiss-fade" style={{ animationDelay: '0.1s' }}>
+      <div className="shrink-0">
         {/* 分隔 */}
         <div className="flex items-center gap-3 mb-3">
           <span className="flex-1 h-px bg-[#1A1A1A]/6" />
