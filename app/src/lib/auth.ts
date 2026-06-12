@@ -61,22 +61,24 @@ export interface Activity {
   created_at?: string;
 }
 
-/** 获取所有活动 */
+/** 获取所有活动（取最近 50 条） */
 export async function fetchActivities(): Promise<Activity[]> {
   const sb = getSupabase();
   if (!sb) return [];
   const { data } = await sb
     .from('activities')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(50);
   return data || [];
 }
 
 /** 添加活动 */
-export async function addActivity(userId: string, text: string, source: string): Promise<void> {
+export async function addActivity(userId: string, text: string, source: string): Promise<Activity | null> {
   const sb = getSupabase();
-  if (!sb) return;
-  await sb.from('activities').insert({ user_id: userId, text, source });
+  if (!sb) return null;
+  const { data } = await sb.from('activities').insert({ user_id: userId, text, source }).select().single();
+  return data;
 }
 
 /** 删除活动 */

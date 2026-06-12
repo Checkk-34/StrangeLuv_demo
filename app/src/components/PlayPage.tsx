@@ -169,6 +169,7 @@ export default function PlayPage({ user }: Props) {
 
   const pageRef = useRef<HTMLDivElement>(null);
   const gameEnterRef = useRef(false);
+  const agendaCacheRef = useRef<AgendaItem[] | null>(null);
 
   /* ---- 页面进出 ---- */
   useEffect(() => {
@@ -214,16 +215,27 @@ export default function PlayPage({ user }: Props) {
     }
   }, [view]);
 
-  /* ---- 加载活动清单 ---- */
+  /* ---- 加载活动清单（有缓存时立即显示） ---- */
   useEffect(() => {
     if (activeIndex === pageIndex && agenda.length === 0 && !loadingAgenda) {
+      // 内存缓存 → 立即显示
+      if (agendaCacheRef.current && agendaCacheRef.current.length > 0) {
+        setAgenda(agendaCacheRef.current);
+      }
       setLoadingAgenda(true);
       fetchActivities().then((data) => {
-        setAgenda(data.map((a) => ({ id: a.id!, text: a.text, source: a.source, user_id: a.user_id })));
+        const items = data.map((a) => ({ id: a.id!, text: a.text, source: a.source, user_id: a.user_id }));
+        agendaCacheRef.current = items;
+        setAgenda(items);
         setLoadingAgenda(false);
       });
     }
   }, [activeIndex, pageIndex, agenda.length, loadingAgenda]);
+
+  /* ---- 同步 agenda 到内存缓存 ---- */
+  useEffect(() => {
+    if (agenda.length > 0) agendaCacheRef.current = agenda;
+  }, [agenda]);
 
   /* ---- 检测对方问卷提交状态（用于卡片提示），每 5s 轮询 ---- */
   useEffect(() => {
@@ -275,16 +287,20 @@ export default function PlayPage({ user }: Props) {
   }
 
   async function addAgendaItem(text: string) {
-    await addActivity(user.username, text, currentGame || 'manual');
-    const data = await fetchActivities();
-    setAgenda(data.map((a) => ({ id: a.id!, text: a.text, source: a.source, user_id: a.user_id })));
+    const item = await addActivity(user.username, text, currentGame || 'manual');
+    if (item) {
+      setAgenda(prev => [{ id: item.id!, text: item.text, source: item.source, user_id: item.user_id }, ...prev]);
+    }
   }
 
   async function addAgendaItems(items: string[]) {
-    // 全部并行写入，后台跑完再刷新列表
-    await Promise.all(items.map(text => addActivity(user.username, text, currentGame || 'quiz')));
-    const data = await fetchActivities();
-    setAgenda(data.map((a) => ({ id: a.id!, text: a.text, source: a.source, user_id: a.user_id })));
+    const results = await Promise.all(
+      items.map(text => addActivity(user.username, text, currentGame || 'quiz'))
+    );
+    const newItems = results.filter(Boolean).map(a => ({ id: a!.id!, text: a!.text, source: a!.source, user_id: a!.user_id }));
+    if (newItems.length > 0) {
+      setAgenda(prev => [...newItems.reverse(), ...prev]);
+    }
   }
 
   async function deleteAgendaItem(id: number) {
@@ -295,9 +311,10 @@ export default function PlayPage({ user }: Props) {
   async function handleManualAdd() {
     const t = inputText.trim();
     if (!t) return;
-    await addActivity(user.username, t, 'manual');
-    const data = await fetchActivities();
-    setAgenda(data.map((a) => ({ id: a.id!, text: a.text, source: a.source, user_id: a.user_id })));
+    const item = await addActivity(user.username, t, 'manual');
+    if (item) {
+      setAgenda(prev => [{ id: item.id!, text: item.text, source: item.source, user_id: item.user_id }, ...prev]);
+    }
     setInputText('');
   }
 

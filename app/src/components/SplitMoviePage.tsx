@@ -244,9 +244,11 @@ export default function SplitMoviePage() {
                       <img
                         src={m.poster}
                         alt={m.title}
-                        className="w-full h-full object-cover transition-transform duration-500 ease-out
-                          group-hover:scale-[1.03]"
+                        className="w-full h-full object-cover transition-all duration-500 ease-out
+                          group-hover:scale-[1.03] opacity-0"
                         loading="lazy"
+                        onLoad={(e) => (e.currentTarget.style.opacity = '1')}
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-[#8A8580]/30 text-3xl select-none">
