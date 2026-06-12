@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>池塘奇遇 · 周末约定</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800;900&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    <style>
+      /* 字体加载前隐藏自定义字体文本，防止 FOUT 闪烁 */
+      .fonts-loading .font-en,
+      .fonts-loading .font-zh {
+        opacity: 0;
+      }
+    </style>
+    <script>
+      document.documentElement.classList.add('fonts-loading');
+      document.fonts.ready.then(function() {
+        document.documentElement.classList.remove('fonts-loading');
+      });
+    </script>
+    <script type="module" crossorigin src="/StrangeLuv_demo/app/assets/index-CaQlW2vA.js"></script>
+    <link rel="stylesheet" crossorigin href="/StrangeLuv_demo/app/assets/index-IrrtfLHH.css">
+  </head>
+  <body class="bg-water-surface text-text-primary font-zh antialiased">
+    <div id="root"></div>
+  </body>
+</html>
